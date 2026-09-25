@@ -1,0 +1,11 @@
+Coloca aquí imágenes con estos nombres exactos y la web las usará automáticamente.
+Si un archivo no existe, se muestra la ilustración generada en su lugar.
+
+Fondos de sección:   hero.jpg · forja.jpg · final.jpg
+Personajes (vertical): mizu.jpg · eiji.jpg · ringo.jpg · taigen.jpg · akemi.jpg · fowler.jpg
+Capítulos (4:3):     cap1.jpg · cap2.jpg · cap3.jpg · cap4.jpg · cap5.jpg
+Temas (vertical):    tema-identidad.jpg · tema-venganza.jpg · tema-mujer.jpg · tema-sakoku.jpg
+
+Sonido (carpeta audio/, junto a Mizu.html):
+musica.mp3 (música de fondo) · viento.mp3 / forja.mp3 / mar.mp3 (ambientes por sección)
+corte1-2.mp3 (clic) · martillo1-2.mp3 (al forjar) · temple.mp3 (espada terminada)

@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>水 · Mizu — Blue Eye Samurai</title>
+<meta name="description" content="Un homenaje interactivo a Blue Eye Samurai: la historia de Mizu, sus personajes, sus temas y su final.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;700;800&family=Cormorant+Garamond:ital,wght@0,300;0,500;1,300&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#06080d; --ink2:#0c1119; --paper:#ece6d8; --muted:#8a92a0;
+  --blue:#5cc2ff; --blue2:#1d6fb8; --blood:#c0271c; --gold:#d9b46c;
+  --serif:'Cormorant Garamond',serif; --jp:'Shippori Mincho',serif; --sans:'Inter',sans-serif;
+  --seigaiha:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='40' viewBox='0 0 80 40'%3E%3Cg fill='none' stroke='%235cc2ff' stroke-opacity='.5'%3E%3Cpath d='M0 40a40 40 0 0 1 80 0M8 40a32 32 0 0 1 64 0M16 40a24 24 0 0 1 48 0M24 40a16 16 0 0 1 32 0'/%3E%3Cpath d='M-40 20a40 40 0 0 1 80 0M-32 20a32 32 0 0 1 64 0M-24 20a24 24 0 0 1 48 0M40 20a40 40 0 0 1 80 0M48 20a32 32 0 0 1 64 0M56 20a24 24 0 0 1 48 0'/%3E%3C/g%3E%3C/svg%3E");
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--ink);color:var(--paper);font-family:var(--sans);font-weight:300;overflow-x:hidden;cursor:none}
+body.loading{overflow:hidden}
+@media (pointer:coarse){body{cursor:auto}#cursor,#cursor-dot{display:none}}
+::selection{background:var(--blue);color:var(--ink)}
+:focus-visible{outline:1px solid var(--blue);outline-offset:4px}
+
+/* LOADER */
+#loader{position:fixed;inset:0;z-index:200;background:var(--ink);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:26px;transition:opacity 1s .2s,visibility 1s .2s}
+#loader.done{opacity:0;visibility:hidden}
+#loader svg{width:120px;height:120px}
+#loader .brush{fill:none;stroke:var(--paper);stroke-width:7;stroke-linecap:round;stroke-dasharray:420;stroke-dashoffset:420;animation:ink 1.6s cubic-bezier(.6,0,.2,1) forwards}
+#loader .brush:nth-child(2){animation-delay:.35s}#loader .brush:nth-child(3){animation-delay:.6s}#loader .brush:nth-child(4){animation-delay:.85s}
+@keyframes ink{to{stroke-dashoffset:0}}
+#loader small{font-size:10px;letter-spacing:.6em;color:var(--muted);text-transform:uppercase}
+
+#fx{position:fixed;inset:0;pointer-events:none;z-index:50}
+#grain{position:fixed;inset:-50%;pointer-events:none;z-index:49;opacity:.07;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  animation:grain 1s steps(4) infinite}
+@keyframes grain{0%{transform:translate(0,0)}25%{transform:translate(-3%,2%)}50%{transform:translate(2%,-3%)}75%{transform:translate(-2%,-1%)}100%{transform:translate(1%,3%)}}
+#progress{position:fixed;top:0;left:0;height:2px;width:0;background:linear-gradient(90deg,var(--blue),var(--blood));z-index:45;box-shadow:0 0 8px var(--blue)}
+
+#cursor{position:fixed;width:38px;height:38px;border:1px solid rgba(92,194,255,.6);border-radius:50%;pointer-events:none;z-index:100;transform:translate(-50%,-50%);transition:width .25s,height .25s,border-color .25s,background .25s}
+#cursor.big{width:70px;height:70px;background:rgba(92,194,255,.08);border-color:var(--blue)}
+#cursor-dot{position:fixed;width:5px;height:5px;background:var(--blue);border-radius:50%;pointer-events:none;z-index:101;transform:translate(-50%,-50%);box-shadow:0 0 12px var(--blue)}
+
+nav{position:fixed;top:0;left:0;right:0;display:flex;justify-content:space-between;align-items:center;padding:28px 5vw;z-index:40;transition:padding .4s,background .4s,backdrop-filter .4s}
+nav.solid{padding:16px 5vw;background:rgba(6,8,13,.72);backdrop-filter:blur(10px);border-bottom:1px solid rgba(255,255,255,.05)}
+nav .logo{font-family:var(--jp);font-size:28px;color:var(--paper);text-decoration:none}
+nav ul{display:flex;gap:34px;list-style:none}
+nav a{color:var(--paper);text-decoration:none;font-size:12px;letter-spacing:.3em;text-transform:uppercase;position:relative;transition:color .3s}
+nav ul a::after{content:'';position:absolute;left:0;bottom:-6px;width:0;height:1px;background:currentColor;transition:width .4s}
+nav ul a:hover::after,nav ul a.active::after{width:100%}
+nav ul a.active{color:var(--blue)}
+#menuBtn{display:none;background:none;border:0;width:34px;height:20px;position:relative;cursor:pointer}
+#menuBtn i{position:absolute;left:0;right:0;height:1px;background:var(--paper);transition:transform .4s,top .4s}
+#menuBtn i:first-child{top:4px}#menuBtn i:last-child{top:15px}
+nav.open #menuBtn i:first-child{top:10px;transform:rotate(45deg)}nav.open #menuBtn i:last-child{top:10px;transform:rotate(-45deg)}
+@media(max-width:800px){
+  #menuBtn{display:block}
+  nav ul{position:fixed;inset:0;flex-direction:column;align-items:center;justify-content:center;gap:40px;background:rgba(6,8,13,.97);opacity:0;visibility:hidden;transition:opacity .4s,visibility .4s;z-index:-1}
+  nav.open ul{opacity:1;visibility:visible}
+  nav ul a{font-size:16px}
+}
+
+section{position:relative;min-height:100vh;padding:14vh 8vw;overflow:hidden}
+.bg-img{position:absolute;inset:0;background-size:cover;background-position:center;opacity:0;transition:opacity 1.5s;z-index:0}
+.bg-img.loaded{opacity:.35}
+.sec-head,.timeline,.facts,.cards,.panels,.cards-hint,.forge-hint,#blade,#forgeBtn,.forged-msg,.spoiler-box,.btn,.quote,.quote-es{position:relative;z-index:2}
+
+/* HERO */
+#hero{display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;background:linear-gradient(#0a1422 0%,#132238 45%,#1b2a3c 62%,var(--ink) 100%)}
+#hero .bg-img.loaded{opacity:.9;inset:-6% 0 0 0}
+section.has-photo .scene,section.has-photo .moon{display:none}
+#forja .bg-img.loaded{opacity:.45}
+#final .bg-img.loaded{opacity:.6}
+.scene{position:absolute;inset:0;z-index:1;pointer-events:none}
+.scene svg{position:absolute;left:0;bottom:0;width:100%;height:100%}
+.layer{will-change:transform}
+#hero::after{content:'';position:absolute;inset:0;background:linear-gradient(to bottom,rgba(6,8,13,.25),transparent 30%,transparent 80%,var(--ink) 100%);pointer-events:none;z-index:1}
+.mist{animation:mist 40s linear infinite alternate}
+@keyframes mist{to{transform:translateX(-200px)}}
+.moon{position:absolute;top:14vh;right:14vw;width:180px;height:180px;border-radius:50%;z-index:1;
+  background:radial-gradient(circle at 40% 40%,#f3efe4,#cfc8b6 60%,#9e978a);box-shadow:0 0 120px 30px rgba(236,230,216,.14);opacity:.9}
+.watermark{position:absolute;font-family:var(--jp);font-weight:800;font-size:62vh;line-height:1;color:transparent;-webkit-text-stroke:1px rgba(92,194,255,.12);top:50%;left:50%;transform:translate(-50%,-50%);user-select:none;z-index:1}
+.hero-inner{position:relative;z-index:3}
+.jp-sub{font-family:var(--jp);letter-spacing:.6em;font-size:14px;color:var(--blue);opacity:0;animation:fadeUp 1.4s .3s forwards}
+.title{font-family:var(--serif);font-weight:300;font-size:clamp(90px,17vw,260px);letter-spacing:.12em;line-height:.95;margin:18px 0;text-shadow:0 10px 60px rgba(0,0,0,.6)}
+.title span{display:inline-block;opacity:0;transform:translateY(80px) rotate(6deg);filter:blur(12px);animation:letter 1.6s cubic-bezier(.2,.8,.2,1) forwards}
+.loading .title span,.loading .jp-sub,.loading .tagline,.loading .eye-wrap{animation-play-state:paused}
+@keyframes letter{to{opacity:1;transform:none;filter:blur(0)}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
+.tagline{font-family:var(--serif);font-style:italic;font-size:clamp(18px,2vw,24px);color:#aab1bd;max-width:620px;margin:0 auto;opacity:0;animation:fadeUp 1.4s 1.6s forwards}
+.eye-wrap{margin:40px auto 0;width:160px;opacity:0;animation:fadeUp 1.4s 2s forwards}
+.scroll-hint{position:absolute;bottom:40px;left:50%;transform:translateX(-50%);z-index:3;font-size:11px;letter-spacing:.4em;color:var(--muted);text-transform:uppercase;display:flex;flex-direction:column;align-items:center;gap:14px}
+.scroll-hint i{width:1px;height:60px;background:linear-gradient(var(--blue),transparent);animation:drip 2s infinite}
+@keyframes drip{0%{transform:scaleY(0);transform-origin:top}50%{transform:scaleY(1);transform-origin:top}51%{transform-origin:bottom}100%{transform:scaleY(0);transform-origin:bottom}}
+
+/* FICHA */
+#ficha{min-height:auto;padding:10vh 8vw;background:var(--ink);border-top:1px solid rgba(255,255,255,.04);border-bottom:1px solid rgba(255,255,255,.04)}
+.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:40px;max-width:1200px;margin:0 auto;text-align:center}
+.fact b{display:block;font-family:var(--serif);font-weight:300;font-size:clamp(48px,5vw,72px);color:var(--paper);line-height:1}
+.fact b sup{font-size:.4em;color:var(--blue)}
+.fact span{display:block;margin-top:12px;font-size:11px;letter-spacing:.3em;text-transform:uppercase;color:var(--muted);line-height:1.8}
+
+/* Section titles */
+.sec-head{display:flex;align-items:baseline;gap:24px;margin-bottom:10vh}
+.sec-num{font-family:var(--jp);font-size:64px;color:var(--blue);opacity:.8}
+.sec-title{font-family:var(--serif);font-weight:300;font-size:clamp(44px,6vw,90px);letter-spacing:.04em}
+.sec-title em{font-style:italic;color:var(--muted)}
+.reveal{opacity:0;transform:translateY(60px);transition:opacity 1.2s cubic-bezier(.2,.8,.2,1),transform 1.2s cubic-bezier(.2,.8,.2,1)}
+.reveal.in{opacity:1;transform:none}
+
+/* HISTORIA */
+#historia{background:var(--ink)}
+#historia::before{content:'';position:absolute;inset:0;background:var(--seigaiha);background-size:80px 40px;opacity:.06;-webkit-mask-image:linear-gradient(transparent,#000 20%,#000 80%,transparent);mask-image:linear-gradient(transparent,#000 20%,#000 80%,transparent);z-index:0}
+.timeline{position:relative;max-width:1100px;margin:0 auto}
+.tl-line{position:absolute;left:50%;top:0;bottom:0;width:1px;background:rgba(255,255,255,.08)}
+.tl-fill{position:absolute;left:0;top:0;width:100%;height:0;background:linear-gradient(var(--blue),var(--blood));box-shadow:0 0 10px var(--blue)}
+.chapter{position:relative;display:grid;grid-template-columns:1fr 1fr;gap:10vw;margin-bottom:22vh;align-items:center}
+.chapter:last-child{margin-bottom:0}
+.chapter:nth-child(odd) .ch-text{grid-column:2}
+.chapter:nth-child(odd) .ch-visual{grid-column:1;grid-row:1}
+.ch-visual{position:relative;aspect-ratio:4/3;border:1px solid rgba(255,255,255,.07);overflow:hidden;background:#0a0f17}
+.ch-visual svg{position:absolute;inset:0;width:100%;height:100%;transition:transform 6s ease-out}
+.ch-visual .photo{position:absolute;inset:0;background-size:cover;background-position:center;opacity:0;transition:opacity 1s}
+.ch-visual.has-img .photo{opacity:1}
+.chapter.in .ch-visual svg,.chapter.in .ch-visual .photo{transform:scale(1.06)}
+.ch-visual .photo{transition:opacity 1s,transform 6s ease-out}
+.ch-kanji{position:absolute;right:14px;bottom:-10px;font-family:var(--jp);font-weight:800;font-size:clamp(90px,10vw,150px);line-height:1;color:transparent;-webkit-text-stroke:1px rgba(236,230,216,.3);transition:color 1s,-webkit-text-stroke-color 1s;z-index:2}
+.chapter.in .ch-kanji{color:rgba(92,194,255,.1);-webkit-text-stroke-color:rgba(92,194,255,.7)}
+.ch-visual::after{content:'';position:absolute;inset:0;background:linear-gradient(to top,rgba(6,8,13,.7),transparent 50%);z-index:1}
+.ch-label{font-size:11px;letter-spacing:.4em;text-transform:uppercase;color:var(--blue)}
+.ch-text h3{font-family:var(--serif);font-weight:500;font-size:40px;margin:14px 0 18px}
+.ch-text p{font-size:17px;line-height:1.9;color:#b9bec8}
+.dot{position:absolute;left:50%;top:50%;width:13px;height:13px;border:1px solid var(--blue);background:var(--ink);transform:translate(-50%,-50%) rotate(45deg);z-index:3;transition:background .6s,box-shadow .6s}
+.chapter.in .dot{background:var(--blue);box-shadow:0 0 20px var(--blue)}
+@media(max-width:800px){.chapter{grid-template-columns:1fr;gap:28px;margin-bottom:14vh}.chapter:nth-child(odd) .ch-text{grid-column:1}.chapter:nth-child(odd) .ch-visual{grid-row:auto}.tl-line,.dot{display:none}}
+
+/* FORJA */
+#forja{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;background:radial-gradient(ellipse at 50% 75%,#2a1208 0%,#120806 35%,var(--ink) 70%);user-select:none}
+#forja .scene svg{height:45%;top:auto}
+#forja .sec-head{justify-content:center;margin-bottom:4vh}
+.forge-hint{font-family:var(--serif);font-style:italic;font-size:22px;color:var(--muted);margin-bottom:8vh}
+#blade{width:min(900px,90vw);filter:drop-shadow(0 0 calc(var(--heat,0) * 40px) rgba(255,120,40,calc(var(--heat,0))));transition:transform .1s}
+#forgeBtn{margin-top:8vh;background:none;border:1px solid rgba(217,180,108,.5);color:var(--gold);font-family:var(--sans);letter-spacing:.35em;text-transform:uppercase;font-size:12px;padding:22px 48px;cursor:none;position:relative;overflow:hidden;transition:border-color .3s;touch-action:none}
+#forgeBtn .bar{position:absolute;left:0;top:0;bottom:0;width:0;background:linear-gradient(90deg,rgba(192,39,28,.5),rgba(255,160,60,.6))}
+#forgeBtn span{position:relative}
+.forged-msg{font-family:var(--serif);font-size:clamp(26px,3vw,40px);font-style:italic;max-width:760px;margin-top:6vh;opacity:0;transform:translateY(20px);transition:all 1.5s}
+.forged-msg.show{opacity:1;transform:none}
+.flash{position:fixed;inset:0;background:#fff;opacity:0;pointer-events:none;z-index:60}
+@media (pointer:coarse){#forgeBtn{cursor:pointer}}
+
+/* PERSONAJES */
+#personajes{background:var(--ink2)}
+#personajes::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 20% 0%,rgba(29,111,184,.15),transparent 50%),radial-gradient(ellipse at 90% 100%,rgba(192,39,28,.1),transparent 50%);z-index:0}
+.cards-hint{font-family:var(--serif);font-style:italic;color:var(--muted);font-size:19px;margin:-7vh 0 6vh}
+.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:28px;perspective:1400px}
+.card{position:relative;height:480px;transform-style:preserve-3d;transition:transform .15s ease-out;cursor:none}
+@media(max-width:1000px){.cards{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:600px){.cards{grid-template-columns:1fr}.card{height:460px}}
+.card-inner{position:absolute;inset:0;transform-style:preserve-3d;transition:transform 1s cubic-bezier(.2,.8,.2,1)}
+.card.flip .card-inner{transform:rotateY(180deg)}
+.face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;border:1px solid rgba(255,255,255,.08);overflow:hidden;display:flex;flex-direction:column;justify-content:flex-end;padding:28px}
+.front .art,.front .photo{position:absolute;inset:0;width:100%;height:100%;transition:transform 1.2s cubic-bezier(.2,.8,.2,1)}
+.front .photo{background-size:cover;background-position:center top;opacity:0;transition:opacity .8s,transform 1.2s cubic-bezier(.2,.8,.2,1)}
+.card.has-img .front .photo{opacity:1}
+.card:hover .front .art,.card:hover .front .photo{transform:scale(1.06)}
+.front::before{content:'';position:absolute;inset:0;background:linear-gradient(to top,rgba(6,8,13,.97) 8%,rgba(6,8,13,.4) 40%,transparent 65%);z-index:1}
+.front .big-k{position:absolute;top:22px;right:18px;font-family:var(--jp);font-weight:800;font-size:120px;line-height:1;color:transparent;-webkit-text-stroke:1px rgba(236,230,216,.35);transition:transform 1s;z-index:1}
+.card:hover .big-k{transform:translateY(-10px) scale(1.05)}
+.front>.role,.front>h4,.front>small{position:relative;z-index:2}
+.role{font-size:10px;letter-spacing:.4em;text-transform:uppercase;color:var(--blue)}
+.front h4{font-family:var(--serif);font-weight:500;font-size:38px;margin-top:8px}
+.card.featured{box-shadow:0 0 0 1px rgba(92,194,255,.35),0 0 40px rgba(92,194,255,.12)}
+.front small{color:var(--muted);font-size:13px}
+.back{transform:rotateY(180deg);background:linear-gradient(160deg,#0f1d2e,#070a10);justify-content:center}
+.back::before{content:'';position:absolute;inset:0;background:var(--seigaiha);background-size:60px 30px;opacity:.05}
+.back p{font-family:var(--serif);font-size:21px;line-height:1.6;font-style:italic;position:relative}
+.back .role{margin-bottom:18px;position:relative}
+.back .quote-mini{margin-top:22px;font-family:var(--jp);font-size:14px;color:var(--gold);letter-spacing:.2em;position:relative}
+
+/* TEMAS */
+#temas{background:var(--ink)}
+.panels{display:flex;height:72vh;gap:6px}
+.panel{flex:1;position:relative;overflow:hidden;border:1px solid rgba(255,255,255,.06);transition:flex 1s cubic-bezier(.2,.8,.2,1);background:#0a0f17;padding:40px 30px;display:flex;flex-direction:column;justify-content:flex-end;outline:none}
+.panel:hover,.panel:focus-within,.panel:focus{flex:3.2}
+.panel .p-art,.panel .photo{position:absolute;inset:0;width:100%;height:100%;opacity:.35;transition:opacity 1s,transform 1.5s;z-index:0}
+.panel .photo{background-size:cover;background-position:center;opacity:0}
+.panel.has-img .photo{opacity:.3}.panel.has-img .p-art{opacity:0}
+.panel:hover .p-art,.panel:focus .p-art{opacity:.75;transform:scale(1.04)}
+.panel.has-img:hover .photo{opacity:.55}
+.panel::after{content:'';position:absolute;inset:0;background:linear-gradient(to top,rgba(6,8,13,.95) 15%,transparent 70%);z-index:0}
+.panel>*:not(.p-art):not(.photo){position:relative;z-index:1}
+.panel .pk{position:absolute!important;top:30px;left:24px;font-family:var(--jp);font-weight:800;font-size:110px;writing-mode:vertical-rl;color:rgba(92,194,255,.14);transition:color .8s}
+.panel:hover .pk{color:rgba(92,194,255,.55)}
+.panel h4{font-family:var(--serif);font-weight:300;font-size:34px;white-space:nowrap}
+.panel p{max-width:460px;font-size:16px;line-height:1.8;color:#c3c8d1;opacity:0;max-height:0;transition:opacity .6s,max-height .8s}
+.panel:hover p,.panel:focus p{opacity:1;max-height:300px;margin-top:14px;transition-delay:.3s}
+@media(max-width:800px){.panels{flex-direction:column;height:auto}.panel{min-height:260px}.panel p{opacity:1;max-height:none;margin-top:12px}.panel .p-art{opacity:.5}}
+
+/* FINAL */
+#final{display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;background:linear-gradient(#06080d 0%,#0c1a2a 55%,#10263b 70%,#06080d 100%);padding-bottom:30vh}
+#final .scene svg{height:48%;top:auto}
+#final .sec-head{justify-content:center}
+.spoiler-box{max-width:780px;font-family:var(--serif);font-size:clamp(22px,2.4vw,32px);line-height:1.6;filter:blur(14px);transition:filter 1.2s;margin:5vh 0;user-select:none}
+.spoiler-box.open{filter:none;user-select:auto}
+.btn{background:none;border:1px solid rgba(92,194,255,.5);color:var(--blue);font-family:var(--sans);letter-spacing:.35em;text-transform:uppercase;font-size:12px;padding:20px 44px;cursor:none;transition:background .4s,color .4s}
+.btn:hover{background:var(--blue);color:var(--ink)}
+@media (pointer:coarse){.btn{cursor:pointer}}
+.quote{font-family:var(--jp);font-size:clamp(28px,4vw,56px);margin-top:14vh;letter-spacing:.2em;min-height:1.4em;text-shadow:0 0 30px rgba(92,194,255,.4)}
+.quote-es{font-family:var(--serif);font-style:italic;color:#aab1bd;font-size:20px;margin-top:10px}
+.ship{animation:bob 6s ease-in-out infinite;transform-origin:center bottom}
+@keyframes bob{0%,100%{transform:translate(0,0) rotate(-1deg)}50%{transform:translate(0,-6px) rotate(1deg)}}
+.wave{animation:waveMove 12s linear infinite}
+.wave.w2{animation-duration:18s;animation-direction:reverse}
+@keyframes waveMove{to{transform:translateX(-400px)}}
+
+/* SONIDO */
+#soundBtn{position:fixed;right:28px;bottom:28px;z-index:46;display:flex;align-items:center;gap:12px;background:rgba(6,8,13,.6);backdrop-filter:blur(8px);border:1px solid rgba(92,194,255,.35);color:var(--paper);font-family:var(--sans);font-size:10px;letter-spacing:.35em;text-transform:uppercase;padding:12px 18px;cursor:none;transition:border-color .3s,background .3s}
+#soundBtn:hover{border-color:var(--blue)}
+#soundBtn .bars{display:flex;align-items:flex-end;gap:3px;height:14px}
+#soundBtn .bars i{width:2px;height:3px;background:var(--blue);transition:height .3s}
+#soundBtn.on .bars i{animation:eq 1s ease-in-out infinite}
+#soundBtn.on .bars i:nth-child(2){animation-delay:-.3s}#soundBtn.on .bars i:nth-child(3){animation-delay:-.6s}#soundBtn.on .bars i:nth-child(4){animation-delay:-.15s}
+@keyframes eq{0%,100%{height:3px}50%{height:14px}}
+#soundBtn:not(.on):not(.seen){animation:pulse 2.4s ease-in-out infinite}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(92,194,255,.35)}50%{box-shadow:0 0 0 8px rgba(92,194,255,0)}}
+@media (pointer:coarse){#soundBtn{cursor:pointer;right:16px;bottom:16px}}
+footer{padding:60px 8vw;border-top:1px solid rgba(255,255,255,.06);display:flex;justify-content:space-between;flex-wrap:wrap;gap:16px;font-size:12px;color:var(--muted);letter-spacing:.15em;background:var(--ink)}
+footer a{color:var(--muted)}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.title span,.jp-sub,.tagline,.eye-wrap{opacity:1;transform:none;filter:none}#loader .brush{stroke-dashoffset:0}}
+</style>
+</head>
+<body class="loading">
+<div id="loader" aria-hidden="true">
+  <svg viewBox="0 0 100 100"><path class="brush" d="M50 8 V88 Q50 94 43 90"/><path class="brush" d="M18 38 H38 L16 72"/><path class="brush" d="M82 30 Q70 44 58 50"/><path class="brush" d="M58 50 Q72 66 88 80"/></svg>
+  <small>Blue Eye Samurai</small>
+</div>
+<canvas id="fx"></canvas>
+<div id="grain"></div>
+<div id="progress"></div>
+<div class="flash" id="flash"></div>
+<div id="cursor"></div><div id="cursor-dot"></div>
+<button id="soundBtn" aria-pressed="false" aria-label="Activar sonido"><span class="bars"><i></i><i></i><i></i><i></i></span><span id="soundLbl">Sonido</span></button>
+
+<nav id="nav">
+  <a href="#hero" class="logo" aria-label="Inicio">水</a>
+  <button id="menuBtn" aria-label="Abrir menú" aria-expanded="false"><i></i><i></i></button>
+  <ul>
+    <li><a href="#historia">Historia</a></li>
+    <li><a href="#forja">Forja</a></li>
+    <li><a href="#personajes">Personajes</a></li>
+    <li><a href="#temas">Temas</a></li>
+    <li><a href="#final">Final</a></li>
+  </ul>
+</nav>
+
+<section id="hero">
+  <div class="bg-img" data-img="img/hero.jpg"></div>
+  <div class="moon" id="moon"></div>
+  <div class="scene" id="heroScene"></div>
+  <div class="watermark" id="wm">水</div>
+  <div class="hero-inner">
+    <p class="jp-sub">青い目の侍</p>
+    <h1 class="title" id="title">MIZU</h1>
+    <p class="tagline">Un país cerrado al mundo. Una espada sin nombre. Unos ojos que no deberían existir.</p>
+    <div class="eye-wrap">
+      <svg viewBox="0 0 160 80" id="eye" aria-hidden="true">
+        <defs>
+          <radialGradient id="iris" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="#e8f7ff"/><stop offset="35%" stop-color="#5cc2ff"/><stop offset="80%" stop-color="#1d6fb8"/><stop offset="100%" stop-color="#0a2540"/>
+          </radialGradient>
+          <clipPath id="lid"><path d="M4 40 Q80 -14 156 40 Q80 94 4 40Z"/></clipPath>
+          <filter id="glow"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+        </defs>
+        <path d="M4 40 Q80 -14 156 40 Q80 94 4 40Z" fill="#0b0f16" stroke="rgba(236,230,216,.5)" stroke-width="1"/>
+        <g clip-path="url(#lid)">
+          <g id="pupil" filter="url(#glow)">
+            <circle cx="80" cy="40" r="22" fill="url(#iris)"/><circle cx="80" cy="40" r="8" fill="#03060a"/><circle cx="74" cy="34" r="3" fill="#fff" opacity=".8"/>
+          </g>
+          <rect id="eyelid" x="0" y="-80" width="160" height="80" fill="#0b0f16"/>
+        </g>
+      </svg>
+    </div>
+  </div>
+  <div class="scroll-hint">Desciende<i></i></div>
+</section>
+
+<section id="ficha">
+  <div class="facts">
+    <div class="fact reveal"><b data-count="2023">0</b><span>Estreno en Netflix</span></div>
+    <div class="fact reveal"><b data-count="8">0</b><span>Episodios en<br>la primera temporada</span></div>
+    <div class="fact reveal"><b>1<sup>er</sup></b><span>Emmy a Mejor<br>Programa de Animación</span></div>
+    <div class="fact reveal"><b>1633</b><span>Japón inicia su<br>política de aislamiento</span></div>
+  </div>
+</section>
+
+<section id="historia">
+  <div class="sec-head reveal"><span class="sec-num">壱</span><h2 class="sec-title">El camino <em>de Mizu</em></h2></div>
+  <div class="timeline" id="timeline">
+    <div class="tl-line"><div class="tl-fill" id="tlFill"></div></div>
+
+    <div class="chapter reveal"><span class="dot"></span>
+      <div class="ch-text"><span class="ch-label">Capítulo I · Origen</span><h3>Nacida para ser despreciada</h3>
+      <p>En un Japón que ha sellado sus fronteras, unos ojos azules son una condena. Mizu crece señalada como un demonio, aprendiendo que el mundo la odia antes de saber siquiera por qué.</p></div>
+      <div class="ch-visual" data-img="img/cap1.jpg" data-scene="origen"><div class="photo"></div><span class="ch-kanji">生</span></div>
+    </div>
+
+    <div class="chapter reveal"><span class="dot"></span>
+      <div class="ch-text"><span class="ch-label">Capítulo II · La forja</span><h3>El herrero ciego</h3>
+      <p>Eiji, un forjador de espadas que no puede ver sus ojos, la acoge en su taller. Entre fuego, martillo y agua fría, Mizu entiende que el acero se templa como las personas: a golpes.</p></div>
+      <div class="ch-visual" data-img="img/cap2.jpg" data-scene="forja"><div class="photo"></div><span class="ch-kanji">鍛</span></div>
+    </div>
+
+    <div class="chapter reveal"><span class="dot"></span>
+      <div class="ch-text"><span class="ch-label">Capítulo III · La máscara</span><h3>Nadie sabrá quién soy</h3>
+      <p>Vestida de hombre y con los ojos ocultos tras cristales tintados, se convierte en un rōnin más. Esconder quién es no es una elección: es la única forma de seguir viva.</p></div>
+      <div class="ch-visual" data-img="img/cap3.jpg" data-scene="mascara"><div class="photo"></div><span class="ch-kanji">面</span></div>
+    </div>
+
+    <div class="chapter reveal"><span class="dot"></span>
+      <div class="ch-text"><span class="ch-label">Capítulo IV · La lista</span><h3>Cuatro hombres blancos</h3>
+      <p>Cuando ella nació, solo cuatro extranjeros estaban en Japón. Uno es su padre. Mizu los busca uno a uno, y el rastro la lleva hasta Abijah Fowler, un traficante de armas con ambiciones de conquista.</p></div>
+      <div class="ch-visual" data-img="img/cap4.jpg" data-scene="lista"><div class="photo"></div><span class="ch-kanji">仇</span></div>
+    </div>
+
+    <div class="chapter reveal"><span class="dot"></span>
+      <div class="ch-text"><span class="ch-label">Capítulo V · Lazos</span><h3>Los que se quedan</h3>
+      <p>No quiere compañía, pero la encuentra: Ringo, que se niega a dejar de seguirla, y Taigen, un samurái herido en su orgullo que empieza persiguiéndola y acaba a su lado.</p></div>
+      <div class="ch-visual" data-img="img/cap5.jpg" data-scene="lazos"><div class="photo"></div><span class="ch-kanji">絆</span></div>
+    </div>
+  </div>
+</section>
+
+<section id="forja">
+  <div class="bg-img" data-img="img/forja.jpg"></div>
+  <div class="scene" id="forgeScene"></div>
+  <div class="sec-head reveal"><span class="sec-num">弐</span><h2 class="sec-title">La <em>forja</em></h2></div>
+  <p class="forge-hint reveal">Mantén pulsado para templar el acero</p>
+  <svg id="blade" viewBox="0 0 800 100" aria-hidden="true">
+    <defs>
+      <pattern id="ito" width="18" height="18" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+        <rect width="18" height="18" fill="#141a24"/><rect width="9" height="9" fill="#2a3444"/>
+      </pattern>
+    </defs>
+    <rect x="10" y="42" width="150" height="20" rx="4" fill="url(#ito)" stroke="#3a4455" stroke-width="1"/>
+    <ellipse cx="170" cy="52" rx="8" ry="30" fill="#1d232e" stroke="#d9b46c" stroke-width="1.5"/>
+    <rect x="178" y="44" width="14" height="16" fill="#8a7a55"/>
+    <path id="steel" d="M192 44 Q480 40 780 16 L792 20 Q500 58 192 60 Z" fill="#5b6570"/>
+    <path id="hamon" d="M200 55 Q260 50 300 54 T400 52 T500 49 T600 44 T700 36 T782 22" fill="none" stroke="rgba(255,255,255,.35)" stroke-width="1"/>
+  </svg>
+  <button id="forgeBtn" aria-label="Mantén pulsado para forjar (también con la barra espaciadora)"><div class="bar" id="forgeBar"></div><span id="forgeLabel">Forjar</span></button>
+  <p class="forged-msg" id="forgedMsg">Una espada no nace afilada. La afilan el fuego, los golpes y el tiempo. Mizu tampoco.</p>
+</section>
+
+<section id="personajes">
+  <div class="sec-head reveal"><span class="sec-num">参</span><h2 class="sec-title">Quienes <em>la rodean</em></h2></div>
+  <p class="cards-hint reveal">Toca una carta para darle la vuelta.</p>
+  <div class="cards" id="cards"></div>
+</section>
+
+<section id="temas">
+  <div class="sec-head reveal"><span class="sec-num">肆</span><h2 class="sec-title">Lo que <em>late debajo</em></h2></div>
+  <div class="panels reveal">
+    <div class="panel" tabindex="0" data-img="img/tema-identidad.jpg" data-art="identidad"><div class="photo"></div><span class="pk">自己</span><h4>Identidad</h4><p>Ni japonesa ni extranjera a ojos de nadie. Mizu vive entre dos mundos que la rechazan y tiene que inventarse a sí misma con lo único que le pertenece: su espada.</p></div>
+    <div class="panel" tabindex="0" data-img="img/tema-venganza.jpg" data-art="venganza"><div class="photo"></div><span class="pk">復讐</span><h4>Venganza</h4><p>La venganza le da un rumbo, pero también la vacía. La serie pregunta todo el rato qué queda de una persona cuando solo vive para destruir a otra.</p></div>
+    <div class="panel" tabindex="0" data-img="img/tema-mujer.jpg" data-art="mujer"><div class="photo"></div><span class="pk">女性</span><h4>Ser mujer</h4><p>Mizu se oculta, Akemi se rebela, otras sobreviven como pueden. Tres respuestas distintas a un mismo mundo que decide por ellas.</p></div>
+    <div class="panel" tabindex="0" data-img="img/tema-sakoku.jpg" data-art="sakoku"><div class="photo"></div><span class="pk">鎖国</span><h4>El país cerrado</h4><p>El Japón aislado del periodo Edo es el escenario perfecto: un lugar donde lo extranjero es amenaza, y donde las armas de fuego pueden cambiarlo todo.</p></div>
+  </div>
+</section>
+
+<section id="final">
+  <div class="bg-img" data-img="img/final.jpg"></div>
+  <div class="scene" id="seaScene"></div>
+  <div class="sec-head reveal"><span class="sec-num">伍</span><h2 class="sec-title">El <em>final</em></h2></div>
+  <p class="spoiler-box" id="spoiler" aria-hidden="true">Todo converge en el castillo de Edo, donde Fowler intenta hacerse con el poder. Tras el enfrentamiento, Fowler escapa por mar rumbo a Inglaterra. Mizu no se detiene: embarca tras él, dejando Japón atrás.</p>
+  <button class="btn" id="spBtn" aria-expanded="false">Desvelar el final</button>
+  <p class="quote" id="quote" lang="ja"></p>
+  <p class="quote-es">El agua no se rompe. Encuentra el camino.</p>
+</section>
+
+<footer><span>水 · Un homenaje fan a Blue Eye Samurai (Netflix, 2023)</span><span>Hecho con tinta y acero</span></footer>
+
+<script>
+const $=s=>document.querySelector(s), $$=s=>document.querySelectorAll(s);
+const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* ---------- Carga de imágenes opcionales (img/…) ---------- */
+function tryImg(src,ok){const i=new Image();i.onload=()=>ok(src);i.src=src}
+
+/* ---------- ARTE GENERADO ---------- */
+const INK='#05070b';
+function pagoda(x,y,s,fill){
+  let d='',w=60*s,h=18*s,cy=y;
+  for(let i=0;i<4;i++){const ww=w*(1-i*.17);d+=`M${x-ww} ${cy} Q${x} ${cy-h*.6} ${x+ww} ${cy} L${x+ww*.7} ${cy-h*.35} L${x-ww*.7} ${cy-h*.35}Z M${x-ww*.55} ${cy} h${ww*1.1} v${h*.9} h${-ww*1.1}Z `;cy-=h*1.4}
+  d+=`M${x-2*s} ${cy} v${-22*s} h${4*s} v${22*s}Z`;
+  return `<path d="${d}" fill="${fill}"/>`;
+}
+function pine(x,y,s,fill){return `<path d="M${x} ${y} v${-60*s} M${x} ${y-60*s} m${-40*s} 0 q${40*s} ${-18*s} ${80*s} 0 q${-40*s} ${-8*s} ${-80*s} 0Z M${x-8*s} ${y-40*s} q${30*s} ${-14*s} ${62*s} ${-2*s} q${-30*s} ${-8*s} ${-62*s} ${2*s}Z M${x+6*s} ${y-80*s} q${-26*s} ${-12*s} ${-54*s} 0 q${26*s} ${-6*s} ${54*s} 0Z" stroke="${fill}" stroke-width="${5*s}" fill="${fill}"/>`}
+
+function heroSVG(){
+  return `<svg viewBox="0 0 1600 900" preserveAspectRatio="xMidYMax slice">
+  <defs>
+    <linearGradient id="mistG" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#9fb6cc" stop-opacity="0"/><stop offset=".5" stop-color="#9fb6cc" stop-opacity=".13"/><stop offset="1" stop-color="#9fb6cc" stop-opacity="0"/></linearGradient>
+    <linearGradient id="fujiG" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#d9dde3"/><stop offset=".22" stop-color="#8b9bb0"/><stop offset=".26" stop-color="#23344a"/><stop offset="1" stop-color="#16243a"/></linearGradient>
+  </defs>
+  <g class="layer" data-depth=".08"><path d="M200 900 L560 690 Q660 560 720 520 Q760 500 800 520 Q860 560 960 690 L1350 900Z" fill="url(#fujiG)" opacity=".8"/></g>
+  <g class="layer" data-depth=".15"><rect class="mist" x="-200" y="560" width="2200" height="160" fill="url(#mistG)"/></g>
+  <g class="layer" data-depth=".22"><path d="M-50 900 L-50 700 Q120 620 260 680 Q380 610 520 690 Q640 650 760 700 L900 720 Q1100 620 1260 690 Q1420 640 1650 700 L1650 900Z" fill="#101b2b"/>${pagoda(1180,700,1.1,'#101b2b')}</g>
+  <g class="layer" data-depth=".32"><rect class="mist" x="-100" y="690" width="2200" height="140" fill="url(#mistG)" style="animation-duration:28s"/></g>
+  <g class="layer" data-depth=".45"><path d="M-50 900 L-50 790 Q200 740 420 780 Q700 720 980 790 Q1260 750 1650 790 L1650 900Z" fill="#0a111b"/>${pagoda(300,800,.7,'#0a111b')}</g>
+  <g class="layer" data-depth=".7"><path d="M-50 900 L-50 850 Q400 820 800 850 Q1200 830 1650 850 L1650 900Z" fill="${INK}"/>${pine(90,870,1.6,INK)}${pine(1480,880,2,INK)}${pine(1380,880,1.1,INK)}</g>
+  </svg>`;
+}
+
+function forgeSVG(){
+  let embers='';for(let i=0;i<30;i++){const x=Math.random()*1600,y=200+Math.random()*200;embers+=`<circle cx="${x}" cy="${y}" r="${Math.random()*2+.5}" fill="#ff9a3c" opacity="${Math.random()*.6+.2}"><animate attributeName="cy" from="${y}" to="${y-200}" dur="${3+Math.random()*4}s" repeatCount="indefinite"/><animate attributeName="opacity" values="0;.8;0" dur="${3+Math.random()*4}s" repeatCount="indefinite"/></circle>`}
+  return `<svg viewBox="0 0 1600 400" preserveAspectRatio="xMidYMax slice">
+  <defs><radialGradient id="fireG" cx="50%" cy="100%" r="60%"><stop offset="0" stop-color="#ff7a2a" stop-opacity=".55"/><stop offset=".5" stop-color="#c0271c" stop-opacity=".18"/><stop offset="1" stop-color="#c0271c" stop-opacity="0"/></radialGradient></defs>
+  <ellipse cx="800" cy="400" rx="700" ry="260" fill="url(#fireG)"/>${embers}
+  <path d="M640 400 V340 H700 V300 H560 Q560 270 620 262 H980 Q1060 262 1080 240 Q1080 290 1020 300 H900 V340 H960 V400Z" fill="${INK}"/>
+  <path d="M1120 400 L1150 230 L1170 230 L1200 400Z M1100 230 h120 v-24 h-120Z" fill="${INK}" opacity=".9"/>
+  <path d="M300 400 Q300 330 360 320 L440 320 Q500 330 500 400Z" fill="${INK}"/>
+  </svg>`;
+}
+
+function seaSVG(){
+  const wave=(y,c,cls,amp)=>{let d=`M0 ${y}`;for(let x=0;x<=2400;x+=100)d+=` q25 ${-amp} 50 0 t50 0`;return `<path class="wave ${cls}" d="${d} V500 H0Z" fill="${c}"/>`};
+  return `<svg viewBox="0 0 1600 500" preserveAspectRatio="xMidYMax slice">
+  <defs><linearGradient id="moonPath" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#cfe7ff" stop-opacity=".35"/><stop offset="1" stop-color="#cfe7ff" stop-opacity="0"/></linearGradient></defs>
+  <rect x="840" y="200" width="120" height="300" fill="url(#moonPath)"/>
+  <g transform="translate(-260 0)"><g class="ship" style="transform-box:fill-box">
+    <path d="M980 225 Q1010 250 1110 250 Q1180 250 1205 222 L1195 212 H990Z" fill="${INK}"/>
+    <path d="M1040 212 V100 M1100 212 V80 M1160 212 V120" stroke="${INK}" stroke-width="3"/>
+    <path d="M1018 120 Q1040 145 1018 195 H1064 Q1080 150 1062 120Z M1078 96 Q1100 130 1078 190 H1124 Q1140 140 1122 96Z M1142 136 Q1160 160 1142 200 H1180 Q1192 165 1178 136Z" fill="#0b1522"/>
+    <path d="M1100 80 L1128 86 L1100 92Z" fill="#c0271c"/>
+  </g></g>
+  ${wave(250,'#0d1f31','',8)}${wave(300,'#0a1826','w2',12)}${wave(360,'#08121d','',16)}${wave(430,INK,'w2',18)}
+  </svg>`;
+}
+
+/* Escenas de capítulo */
+const chapterScenes={
+  origen:`<svg viewBox="0 0 400 300" preserveAspectRatio="xMidYMid slice"><defs><radialGradient id="c1" cx="50%" cy="40%"><stop offset="0" stop-color="#1d3a5c"/><stop offset="1" stop-color="#06080d"/></radialGradient></defs><rect width="400" height="300" fill="url(#c1)"/>
+   <circle cx="200" cy="120" r="70" fill="none" stroke="#5cc2ff" stroke-opacity=".25"/><circle cx="200" cy="120" r="40" fill="#5cc2ff" opacity=".08"/>
+   <path d="M130 300 Q140 220 190 205 L210 205 Q260 220 270 300Z M200 205 m-24 -28 a24 28 0 1 0 48 0 a24 28 0 1 0 -48 0" fill="${INK}"/>
+   <circle cx="192" cy="176" r="2.4" fill="#8fd6ff"/><circle cx="208" cy="176" r="2.4" fill="#8fd6ff"/>
+   ${[60,95,305,340].map((x,i)=>`<path d="M${x} 300 Q${x} 230 ${x+(i<2?15:-15)} 215 a14 16 0 1 1 ${i<2?10:-10} 0 Q${x+(i<2?40:-40)} 240 ${x+(i<2?40:-40)} 300Z" fill="#0b1119"/><circle cx="${x+(i<2?20:-20)}" cy="205" r="1.6" fill="#c0271c"/>`).join('')}</svg>`,
+  forja:`<svg viewBox="0 0 400 300" preserveAspectRatio="xMidYMid slice"><defs><radialGradient id="c2" cx="55%" cy="75%" r="70%"><stop offset="0" stop-color="#ff7a2a"/><stop offset=".35" stop-color="#7a1c10"/><stop offset="1" stop-color="#06080d"/></radialGradient></defs><rect width="400" height="300" fill="url(#c2)"/>
+   <path d="M170 300 V262 H200 V244 H140 Q140 230 165 226 H300 Q330 226 340 212 Q340 238 316 244 H260 V262 H290 V300Z" fill="${INK}"/>
+   <path d="M60 300 Q66 200 110 186 L126 186 Q150 200 156 250 L200 214 L210 224 L162 280 V300Z M118 186 m-18 -22 a18 22 0 1 0 36 0 a18 22 0 1 0 -36 0" fill="${INK}"/>
+   <path d="M196 206 L230 176 L240 186 L206 216Z" fill="${INK}"/>
+   ${Array.from({length:18},()=>`<circle cx="${230+Math.random()*80}" cy="${160+Math.random()*60}" r="${Math.random()*1.8+.5}" fill="#ffd28a"/>`).join('')}</svg>`,
+  mascara:`<svg viewBox="0 0 400 300" preserveAspectRatio="xMidYMid slice"><rect width="400" height="300" fill="#0b1119"/><rect width="400" height="300" fill="#1a2433" opacity=".6"/>
+   <circle cx="200" cy="150" r="110" fill="#101a28"/>
+   <path d="M120 300 Q130 210 185 196 L215 196 Q270 210 280 300Z M200 196 m-30 -40 a30 40 0 1 0 60 0 a30 40 0 1 0 -60 0 M226 130 Q300 150 290 250 Q270 190 232 170Z" fill="${INK}"/>
+   <circle cx="186" cy="152" r="11" fill="#0e2438" stroke="#2a3b4f" stroke-width="2"/><circle cx="214" cy="152" r="11" fill="#0e2438" stroke="#2a3b4f" stroke-width="2"/><path d="M197 152 h6" stroke="#2a3b4f" stroke-width="2"/>
+   <circle cx="186" cy="152" r="3" fill="#5cc2ff" opacity=".7"/><circle cx="214" cy="152" r="3" fill="#5cc2ff" opacity=".7"/>
+   <path d="M270 40 L120 290" stroke="#c7cdd5" stroke-width="2" opacity=".5"/></svg>`,
+  lista:`<svg viewBox="0 0 400 300" preserveAspectRatio="xMidYMid slice"><rect width="400" height="300" fill="#e3dac4"/><rect width="400" height="300" fill="#0b0f16" opacity=".86"/>
+   ${[0,1,2,3].map(i=>`<g transform="translate(${70+i*80} 60)"><rect x="-26" y="0" width="52" height="170" fill="#d8ceb4" opacity=".9"/><path d="M-14 20 v130" stroke="#111" stroke-width="3" opacity=".8" stroke-dasharray="${8+i*3} 7"/>${i===3?'':`<path d="M-30 90 L30 60" stroke="#c0271c" stroke-width="5" opacity=".9"/>`}</g>`).join('')}
+   <circle cx="310" cy="220" r="22" fill="#c0271c" opacity=".85"/><text x="310" y="228" font-family="Shippori Mincho" font-size="22" fill="#e3dac4" text-anchor="middle">仇</text></svg>`,
+  lazos:`<svg viewBox="0 0 400 300" preserveAspectRatio="xMidYMid slice"><defs><linearGradient id="c5" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#c9674a"/><stop offset=".55" stop-color="#3a1c2a"/><stop offset="1" stop-color="#06080d"/></linearGradient></defs><rect width="400" height="300" fill="url(#c5)"/>
+   <circle cx="200" cy="170" r="60" fill="#f2b27a" opacity=".6"/><path d="M0 230 Q200 200 400 230 V300 H0Z" fill="${INK}"/>
+   <g fill="${INK}"><path d="M110 240 v-50 q0-14 12-16 h12 q12 2 12 16 v50Z"/><circle cx="128" cy="160" r="12"/>
+   <path d="M180 240 v-62 q0-16 14-18 h14 q14 2 14 18 v62Z"/><circle cx="201" cy="146" r="14"/><path d="M226 230 L262 110" stroke="${INK}" stroke-width="3"/>
+   <path d="M254 240 v-60 q0-16 14-18 h14 q14 2 14 18 v60Z"/><circle cx="275" cy="148" r="14"/><rect x="270" y="126" width="10" height="10"/></g></svg>`
+};
+
+/* Arte de los temas */
+const themeArt={
+  identidad:`<svg viewBox="0 0 300 600" preserveAspectRatio="xMidYMid slice"><rect width="150" height="600" fill="#0e1d30"/><rect x="150" width="150" height="600" fill="#2a0f0d"/><path d="M150 200 a70 90 0 0 0 0 180Z" fill="#5cc2ff" opacity=".35"/><path d="M150 200 a70 90 0 0 1 0 180Z" fill="#ece6d8" opacity=".2"/><circle cx="125" cy="280" r="7" fill="#5cc2ff"/><circle cx="175" cy="280" r="7" fill="#ece6d8" opacity=".6"/><path d="M150 0 V600" stroke="#ece6d8" stroke-opacity=".3"/></svg>`,
+  venganza:`<svg viewBox="0 0 300 600" preserveAspectRatio="xMidYMid slice"><rect width="300" height="600" fill="#0c0708"/><circle cx="150" cy="250" r="110" fill="#c0271c" opacity=".7"/>${Array.from({length:14},()=>`<circle cx="${60+Math.random()*180}" cy="${130+Math.random()*260}" r="${Math.random()*14+3}" fill="#c0271c" opacity=".7"/>`).join('')}<path d="M20 520 L280 60" stroke="#ece6d8" stroke-width="3" opacity=".6"/></svg>`,
+  mujer:`<svg viewBox="0 0 300 600" preserveAspectRatio="xMidYMid slice"><rect width="300" height="600" fill="#1d0f1c"/><path d="M-10 90 Q120 120 170 220 Q210 300 320 320" stroke="#0a0508" stroke-width="10" fill="none"/><path d="M120 150 Q150 110 200 100 M170 220 Q220 200 250 150" stroke="#0a0508" stroke-width="5" fill="none"/>${Array.from({length:22},()=>{const x=Math.random()*300,y=60+Math.random()*420;return `<g transform="translate(${x} ${y}) rotate(${Math.random()*360})"><path d="M0 0 q6 -10 0 -18 q-6 8 0 18Z M0 0 q10 -4 16 4 q-10 4 -16 -4Z M0 0 q-10 -4 -16 4 q10 4 16 -4Z" fill="#f2a7c3" opacity="${.4+Math.random()*.5}"/></g>`}).join('')}</svg>`,
+  sakoku:`<svg viewBox="0 0 300 600" preserveAspectRatio="xMidYMid slice"><rect width="300" height="600" fill="#0b1726"/><path d="M-20 420 Q40 300 140 300 Q230 300 250 360 Q210 330 180 350 Q220 360 210 400 Q180 370 150 390 L320 600 H-20Z" fill="#1d4a70"/><path d="M140 300 Q200 280 250 360" stroke="#ece6d8" stroke-width="6" fill="none" stroke-dasharray="3 9" stroke-linecap="round"/><path d="M-20 470 Q150 440 320 480 V600 H-20Z" fill="#0f2c46"/><path d="M200 470 v-40 M188 470 h24 l-4 8 h-16Z" stroke="#06080d" fill="#06080d" stroke-width="3"/></svg>`
+};
+
+/* Retratos */
+function portrait(p){
+  const id='g'+p.id;
+  return `<svg class="art" viewBox="0 0 300 440" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+  <defs><linearGradient id="${id}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${p.c1}"/><stop offset="1" stop-color="#06080d"/></linearGradient>
+  <filter id="${id}b"><feGaussianBlur stdDeviation="2.5"/></filter></defs>
+  <rect width="300" height="440" fill="url(#${id})"/>
+  <circle cx="150" cy="${p.cy||165}" r="${p.r||112}" fill="${p.c2}" opacity="${p.o||.85}"/>
+  ${p.back||''}
+  <g fill="${INK}">
+    <path d="M30 440 Q40 305 128 272 L172 272 Q260 305 270 440Z"/>
+    <rect x="133" y="222" width="34" height="56"/>
+    <ellipse cx="150" cy="190" rx="${p.hw||40}" ry="48"/>
+    ${p.front||''}
+  </g>
+  ${p.glow||''}
+  </svg>`;
+}
+const chars=[
+  {id:'mizu',featured:true,k:'水',role:'Protagonista',name:'Mizu',sub:'Rōnin de ojos azules',
+   back:`<path d="M258 90 L190 330" stroke="${INK}" stroke-width="9"/><ellipse cx="236" cy="168" rx="16" ry="6" transform="rotate(-70 236 168)" fill="${INK}"/>`,
+   front:`<path d="M186 164 Q236 170 232 272 Q214 222 186 204Z"/><path d="M110 176 Q150 130 190 176 Q150 150 110 176Z"/>`,
+   glow:`<g><circle cx="134" cy="192" r="12" fill="#0e2438" stroke="#2c3e52" stroke-width="2"/><circle cx="166" cy="192" r="12" fill="#0e2438" stroke="#2c3e52" stroke-width="2"/><path d="M146 192 h8" stroke="#2c3e52" stroke-width="2"/><circle cx="134" cy="192" r="4" fill="#5cc2ff" filter="url(#gmizub)"/><circle cx="166" cy="192" r="4" fill="#5cc2ff" filter="url(#gmizub)"/><circle cx="134" cy="192" r="2" fill="#dff4ff"/><circle cx="166" cy="192" r="2" fill="#dff4ff"/></g>`,
+   c1:'#16324f',c2:'#dfe6ea',o:.9,
+   text:'Nacida con los ojos de un extranjero en un país que los prohíbe. Convirtió el odio que recibió en filo y precisión.',jq:'私は何者でもない'},
+  {id:'eiji',k:'師',role:'Mentor',name:'Eiji',sub:'Herrero de espadas ciego',
+   back:`${Array.from({length:14},()=>`<circle cx="${190+Math.random()*80}" cy="${250+Math.random()*80}" r="${Math.random()*2+.6}" fill="#ffd28a"/>`).join('')}`,
+   front:`<path d="M222 440 L232 300 L244 300 L238 440Z"/><rect x="214" y="282" width="46" height="26" rx="3"/><path d="M112 158 Q150 128 188 158 L186 170 Q150 150 114 170Z"/>`,
+   glow:`<rect x="110" y="170" width="80" height="8" fill="#d8ceb4" opacity=".75"/><path d="M128 196 q6 3 12 0 M160 196 q6 3 12 0" stroke="#3a3a3a" stroke-width="2" fill="none"/>`,
+   c1:'#4a1a0c',c2:'#ff8a3c',o:.75,
+   text:'Lo más parecido a un padre que ha tenido. Le dio un techo, un oficio y una forma de mirar el acero.',jq:'鉄は熱いうちに打て'},
+  {id:'ringo',k:'忠',role:'Aprendiz',name:'Ringo',sub:'Cocinero nacido sin manos',hw:44,
+   back:`<path d="M150 50 q12 -18 30 -14 q-10 12 -30 14Z" fill="#4c7a3a"/>`,
+   front:`<path d="M112 176 h76 v10 h-76Z"/><path d="M188 178 Q214 186 222 214 Q206 198 188 190Z M188 182 Q222 176 236 196 Q214 190 188 188Z"/>`,
+   glow:`<path d="M112 176 h76 v10 h-76Z" fill="#e8e0cc" opacity=".85"/><path d="M136 222 q14 10 28 0" stroke="#e8e0cc" stroke-width="2" fill="none" opacity=".4"/>`,
+   c1:'#3d0e0c',c2:'#c0271c',o:.9,cy:175,r:118,
+   text:'Luz en medio de la sangre. Su lealtad es tan terca como la venganza de ella.',jq:'ご主人様！'},
+  {id:'taigen',k:'誉',role:'Rival',name:'Taigen',sub:'Samurái de orgullo herido',
+   back:`<path d="M60 110 L130 330" stroke="${INK}" stroke-width="8"/><ellipse cx="80" cy="170" rx="14" ry="5" transform="rotate(72 80 170)" fill="${INK}"/>`,
+   front:`<path d="M136 150 q14 -10 28 0 v-8 h16 v-8 h-16 q-14 -6 -28 0Z"/><path d="M60 330 L100 290 L200 290 L240 330 L240 300 L200 282 L100 282 L60 300Z"/>`,
+   c1:'#1c1a33',c2:'#8e2a2a',o:.85,
+   text:'Empieza queriendo recuperar su honor derrotándola. Lo que surge entre ellos es mucho más complicado que el odio.',jq:'名誉のために'},
+  {id:'akemi',k:'翔',role:'Espejo',name:'Akemi',sub:'Princesa que rechaza su destino',hw:36,
+   back:`${Array.from({length:12},()=>{const x=30+Math.random()*240,y=40+Math.random()*300;return `<circle cx="${x}" cy="${y}" r="${Math.random()*3+2}" fill="#f7c3d6" opacity=".7"/>`}).join('')}`,
+   front:`<ellipse cx="150" cy="150" rx="64" ry="38"/><ellipse cx="150" cy="118" rx="40" ry="26"/>`,
+   glow:`<g stroke="#d9b46c" stroke-width="2.5"><path d="M96 138 L66 118"/><path d="M204 138 L234 118"/><path d="M186 110 L220 84"/></g><g fill="#d9b46c"><circle cx="66" cy="118" r="4"/><circle cx="234" cy="118" r="4"/><circle cx="220" cy="84" r="5"/><path d="M220 90 v18 M216 96 h8" stroke="#d9b46c"/></g>`,
+   c1:'#3a1336',c2:'#e8a3b8',o:.8,
+   text:'Pelea con otras armas la misma guerra: ser mujer y decidir su propia vida.',jq:'私の人生は私のもの'},
+  {id:'fowler',k:'銃',role:'Antagonista',name:'Abijah Fowler',sub:'Traficante de armas irlandés',
+   back:`${Array.from({length:6},(_,i)=>`<circle cx="${70+i*34}" cy="${80+(i%2)*30}" r="${30+Math.random()*20}" fill="#9aa39a" opacity=".12"/>`).join('')}`,
+   front:`<ellipse cx="150" cy="150" rx="78" ry="12"/><path d="M108 150 L114 96 Q150 84 186 96 L192 150Z"/><path d="M114 204 Q150 262 186 204 Q170 250 150 252 Q130 250 114 204Z"/><path d="M52 440 L90 320 L110 330 L80 440Z"/>`,
+   glow:`<rect x="110" y="136" width="80" height="6" fill="#6b1510"/><circle cx="136" cy="190" r="2" fill="#c7a86a"/><circle cx="164" cy="190" r="2" fill="#c7a86a"/>`,
+   c1:'#16241c',c2:'#9aa38a',o:.55,
+   text:'Uno de los cuatro nombres. Pólvora, ambición y un plan para poner Japón a sus pies.',jq:'火薬と野心'}
+];
+
+$('#cards').innerHTML=chars.map(c=>`
+  <div class="card reveal${c.featured?' featured':''}" tabindex="0" role="button" aria-label="${c.name}: dar la vuelta" data-img="img/${c.id}.jpg"><div class="card-inner">
+    <div class="face front">${portrait(c)}<div class="photo"></div><span class="big-k">${c.k}</span><span class="role">${c.role}</span><h4>${c.name}</h4><small>${c.sub}</small></div>
+    <div class="face back"><span class="role">${c.featured?'Quién es':'Su relación con Mizu'}</span><p>${c.text}</p><span class="quote-mini" lang="ja">${c.jq}</span></div>
+  </div></div>`).join('');
+
+$('#heroScene').innerHTML=heroSVG();
+$('#forgeScene').innerHTML=forgeSVG();
+$('#seaScene').innerHTML=seaSVG();
+$$('.ch-visual').forEach(v=>v.insertAdjacentHTML('afterbegin',chapterScenes[v.dataset.scene]));
+$$('.panel').forEach(p=>p.insertAdjacentHTML('afterbegin',themeArt[p.dataset.art].replace('<svg','<svg class="p-art"')));
+
+/* Fotos reales opcionales: si existe el archivo en img/, sustituye/enriquece el arte */
+$$('.bg-img[data-img]').forEach(el=>tryImg(el.dataset.img,src=>{el.style.backgroundImage=`url(${src})`;el.classList.add('loaded');el.parentElement.classList.add('has-photo')}));
+$$('.card[data-img],.ch-visual[data-img],.panel[data-img]').forEach(el=>tryImg(el.dataset.img,src=>{el.querySelector('.photo').style.backgroundImage=`url(${src})`;el.classList.add('has-img')}));
+
+/* ---------- Loader ---------- */
+addEventListener('load',()=>setTimeout(()=>{$('#loader').classList.add('done');document.body.classList.remove('loading')},reduced?0:1500));
+
+/* ---------- Canvas FX ---------- */
+const cv=$('#fx'), ctx=cv.getContext('2d');
+let W,H,DPR=Math.min(devicePixelRatio||1,2);
+function resize(){W=innerWidth;H=innerHeight;cv.width=W*DPR;cv.height=H*DPR;cv.style.width=W+'px';cv.style.height=H+'px';ctx.setTransform(DPR,0,0,DPR,0,0)}
+resize();addEventListener('resize',resize);
+
+$('#title').innerHTML=[...'MIZU'].map((c,i)=>`<span style="animation-delay:${.5+i*.15}s">${c}</span>`).join('');
+
+const mouse={x:W/2,y:H/2};
+const cur=$('#cursor'),dot=$('#cursor-dot');let cx=W/2,cy=H/2;
+const trail=[],slashes=[],sparks=[];
+addEventListener('pointermove',e=>{mouse.x=e.clientX;mouse.y=e.clientY;if(e.pointerType==='mouse')trail.push({x:e.clientX,y:e.clientY,t:performance.now()})});
+document.addEventListener('mouseover',e=>{cur.classList.toggle('big',!!e.target.closest('a,button,.card,.panel'))});
+
+const flakes=[];const N=reduced?30:(W<700?70:140);
+for(let i=0;i<N;i++)flakes.push({x:Math.random()*W,y:Math.random()*H,r:Math.random()*1.8+.4,vy:Math.random()*.6+.25,ph:Math.random()*6.28,a:Math.random()*.5+.2});
+
+addEventListener('pointerdown',e=>{
+  if(e.target.closest('#forgeBtn,button,a,.card,.panel'))return;
+  slashes.push({x:e.clientX,y:e.clientY,ang:-0.5+Math.random()*-.6,life:1});
+  sfx(Math.random()<.5?'corte1':'corte2',.3);
+  for(let i=0;i<14;i++)sparks.push({x:e.clientX,y:e.clientY,vx:(Math.random()-.5)*7,vy:(Math.random()-.5)*7,life:1,c:'140,210,255'});
+});
+
+/* Parpadeo del ojo */
+const lid=$('#eyelid');
+function blink(){lid.animate([{transform:'translateY(0)'},{transform:'translateY(80px)'},{transform:'translateY(0)'}],{duration:260,easing:'ease-in-out'});setTimeout(blink,3000+Math.random()*4000)}
+if(!reduced)setTimeout(blink,4000);
+
+const eye=$('#eye'),pupil=$('#pupil'),layers=$$('#heroScene .layer');
+let t=0;
+function loop(){
+  t+=.016;ctx.clearRect(0,0,W,H);
+  cx+=(mouse.x-cx)*.15;cy+=(mouse.y-cy)*.15;
+  cur.style.left=cx+'px';cur.style.top=cy+'px';dot.style.left=mouse.x+'px';dot.style.top=mouse.y+'px';
+
+  for(const f of flakes){
+    f.y+=f.vy;f.x+=Math.sin(t+f.ph)*.35;
+    const dx=f.x-mouse.x,dy=f.y-mouse.y,d=Math.hypot(dx,dy);
+    if(d<110&&d>0){f.x+=dx/d*2.2;f.y+=dy/d*2.2}
+    if(f.y>H+5){f.y=-5;f.x=Math.random()*W}
+    ctx.beginPath();ctx.arc(f.x,f.y,f.r,0,6.28);ctx.fillStyle=`rgba(236,240,248,${f.a})`;ctx.fill();
+  }
+
+  const now=performance.now();
+  while(trail.length&&now-trail[0].t>160)trail.shift();
+  for(let i=1;i<trail.length;i++){
+    const a=trail[i-1],b=trail[i],k=i/trail.length;
+    ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);
+    ctx.strokeStyle=`rgba(150,215,255,${k*.7})`;ctx.lineWidth=k*3;ctx.lineCap='round';ctx.stroke();
+  }
+  for(let i=slashes.length-1;i>=0;i--){
+    const s=slashes[i];s.life-=.035;if(s.life<=0){slashes.splice(i,1);continue}
+    const L=420*(1.2-s.life),cos=Math.cos(s.ang),sin=Math.sin(s.ang);
+    ctx.save();ctx.shadowColor='#5cc2ff';ctx.shadowBlur=25;
+    ctx.beginPath();ctx.moveTo(s.x-cos*L,s.y-sin*L);ctx.lineTo(s.x+cos*L,s.y+sin*L);
+    ctx.strokeStyle=`rgba(230,248,255,${s.life})`;ctx.lineWidth=2.5*s.life;ctx.stroke();ctx.restore();
+  }
+  for(let i=sparks.length-1;i>=0;i--){
+    const p=sparks[i];p.x+=p.vx;p.y+=p.vy;p.vy+=.12;p.life-=.02;
+    if(p.life<=0){sparks.splice(i,1);continue}
+    ctx.beginPath();ctx.arc(p.x,p.y,1.6*p.life+.4,0,6.28);ctx.fillStyle=`rgba(${p.c},${p.life})`;ctx.fill();
+  }
+
+  if(scrollY<H){
+    const r=eye.getBoundingClientRect();
+    const ex=r.left+r.width/2,ey=r.top+r.height/2,ang=Math.atan2(mouse.y-ey,mouse.x-ex),dist=Math.min(16,Math.hypot(mouse.x-ex,mouse.y-ey)/25);
+    pupil.setAttribute('transform',`translate(${Math.cos(ang)*dist},${Math.sin(ang)*dist*.6})`);
+    const mx=(mouse.x/W-.5),my=(mouse.y/H-.5);
+    layers.forEach(l=>{const d=+l.dataset.depth;l.style.transform=`translate(${-mx*d*60}px,${scrollY*d*.5-my*d*20}px)`});
+  }
+
+  forgeStep();
+  requestAnimationFrame(loop);
+}
+
+/* ---------- Scroll ---------- */
+const nav=$('#nav'),navLinks=$$('nav ul a');
+function onScroll(){
+  const y=scrollY;
+  $('#wm').style.transform=`translate(-50%,calc(-50% + ${y*.4}px))`;
+  $('#moon').style.transform=`translateY(${y*.25}px)`;
+  const hb=$('#hero .bg-img');if(y<H)hb.style.transform=`translateY(${y*.3}px) scale(1.05)`;
+  $('#title').style.letterSpacing=(.12+y/3000)+'em';
+  const tl=$('#timeline').getBoundingClientRect();
+  $('#tlFill').style.height=Math.min(1,Math.max(0,(H*.6-tl.top)/tl.height))*100+'%';
+  $('#progress').style.width=(y/(document.documentElement.scrollHeight-H))*100+'%';
+  nav.classList.toggle('solid',y>60);
+}
+addEventListener('scroll',onScroll,{passive:true});onScroll();
+
+const secIO=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){curSection=e.target.id;applyMix()}if(e.isIntersecting)navLinks.forEach(a=>a.classList.toggle('active',a.getAttribute('href')==='#'+e.target.id))}),{rootMargin:'-45% 0px -50% 0px'});
+$$('section[id]').forEach(s=>secIO.observe(s));
+
+$('#menuBtn').onclick=()=>{const o=nav.classList.toggle('open');$('#menuBtn').setAttribute('aria-expanded',o)};
+navLinks.forEach(a=>a.addEventListener('click',()=>{nav.classList.remove('open');$('#menuBtn').setAttribute('aria-expanded',false)}));
+
+const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}}),{threshold:.15});
+$$('.reveal').forEach(el=>io.observe(el));
+
+/* Contadores */
+const cio=new IntersectionObserver(es=>es.forEach(e=>{if(!e.isIntersecting)return;cio.unobserve(e.target);
+  const el=e.target,end=+el.dataset.count,start=end>100?end-60:0,t0=performance.now();
+  (function step(n){const k=Math.min(1,(n-t0)/1600),v=Math.round(start+(end-start)*(1-Math.pow(1-k,3)));el.textContent=v;if(k<1)requestAnimationFrame(step)})(t0)}),{threshold:.6});
+$$('[data-count]').forEach(el=>cio.observe(el));
+
+/* ---------- Cartas ---------- */
+$$('.card').forEach(c=>{
+  c.addEventListener('mousemove',e=>{if(c.classList.contains('flip'))return;const r=c.getBoundingClientRect(),x=(e.clientX-r.left)/r.width-.5,y=(e.clientY-r.top)/r.height-.5;c.style.transform=`rotateY(${x*12}deg) rotateX(${-y*12}deg)`});
+  c.addEventListener('mouseleave',()=>c.style.transform='');
+  const flip=()=>{c.style.transform='';c.classList.toggle('flip')};
+  c.addEventListener('click',flip);
+  c.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();flip()}});
+});
+
+/* ---------- Forja ---------- */
+let heat=0,heating=false,forged=false;
+const btn=$('#forgeBtn'),steel=$('#steel'),blade=$('#blade'),bar=$('#forgeBar');
+btn.addEventListener('pointerdown',e=>{e.preventDefault();heating=true});
+['pointerup','pointerleave','pointercancel'].forEach(ev=>btn.addEventListener(ev,()=>heating=false));
+btn.addEventListener('keydown',e=>{if(e.key===' '||e.key==='Enter'){e.preventDefault();heating=true}});
+btn.addEventListener('keyup',()=>heating=false);
+btn.addEventListener('contextmenu',e=>e.preventDefault());
+const stops=[[0,[91,101,112]],[.45,[194,54,26]],[.8,[255,154,60]],[1,[255,244,214]]];
+function heatColor(h){for(let i=1;i<stops.length;i++){if(h<=stops[i][0]){const[a0,c0]=stops[i-1],[a1,c1]=stops[i],k=(h-a0)/(a1-a0);return`rgb(${c0.map((v,j)=>Math.round(v+(c1[j]-v)*k)).join(',')})`}}return'rgb(255,244,214)'}
+function forgeStep(){
+  if(forged){heat=Math.max(0,heat-.004)}
+  else if(heating){heat=Math.min(1,heat+.006)}else{heat=Math.max(0,heat-.01)}
+  steel.setAttribute('fill',forged&&heat<.05?'#c9d3dc':heatColor(heat));
+  blade.style.setProperty('--heat',heat);
+  bar.style.width=(forged?100:heat*100)+'%';
+  if(heating&&!forged){
+    blade.style.transform=`translate(${(Math.random()-.5)*heat*4}px,${(Math.random()-.5)*heat*4}px)`;
+    if(heat>.2&&Math.random()<heat){
+      const r=blade.getBoundingClientRect(),px=r.left+r.width*(.25+Math.random()*.7),py=r.top+r.height*.4;
+      for(let i=0;i<3;i++)sparks.push({x:px,y:py,vx:(Math.random()-.5)*6,vy:-Math.random()*6-1,life:1,c:'255,170,70'});
+    }
+  }else blade.style.transform='';
+  if(heating&&!forged&&performance.now()>nextHit){sfx(Math.random()<.5?'martillo1':'martillo2',.35+heat*.4);nextHit=performance.now()+750-heat*420}
+  if(heat>=1&&!forged){
+    forged=true;heating=false;sfx('temple',.8);
+    const f=$('#flash');f.style.transition='none';f.style.opacity=.85;
+    requestAnimationFrame(()=>requestAnimationFrame(()=>{f.style.transition='opacity 1.2s';f.style.opacity=0}));
+    $('#forgeLabel').textContent='Acero templado';$('#forgedMsg').classList.add('show');
+  }
+}
+
+/* ---------- Final ---------- */
+$('#spBtn').onclick=()=>{const s=$('#spoiler'),o=s.classList.toggle('open');s.setAttribute('aria-hidden',!o);$('#spBtn').setAttribute('aria-expanded',o);$('#spBtn').textContent=o?'Ocultar el final':'Desvelar el final'};
+
+const qText='水は道を見つける';let qi=0,qStarted=false;
+new IntersectionObserver(es=>{if(es[0].isIntersecting&&!qStarted){qStarted=true;const iv=setInterval(()=>{$('#quote').textContent=qText.slice(0,++qi);if(qi>=qText.length)clearInterval(iv)},180)}}).observe($('#quote'));
+
+/* ---------- Sonido (música, ambiente y efectos) ---------- */
+const mkA=(src,loop)=>{const a=new Audio(src);a.loop=loop;a.preload='auto';a.volume=0;return a};
+const music=mkA('audio/musica.mp3',true);
+const amb={viento:mkA('audio/viento.mp3',true),forja:mkA('audio/forja.mp3',true),mar:mkA('audio/mar.mp3',true)};
+const SFX={};['corte1','corte2','martillo1','martillo2','temple'].forEach(n=>{SFX[n]=new Audio(`audio/${n}.mp3`);SFX[n].preload='auto'});
+const MIX={hero:['viento',.4,.4],ficha:['viento',.3,.4],historia:['viento',.25,.45],forja:['forja',.6,.2],personajes:[null,0,.5],temas:[null,0,.5],final:['mar',.5,.35]};
+let soundOn=false,curSection='hero',nextHit=0,lastSlash=0;
+const targets=new Map();
+function fadeTo(a,v){targets.set(a,v);if(v>0&&a.paused)a.play().catch(()=>{})}
+setInterval(()=>targets.forEach((v,a)=>{const d=v-a.volume;if(Math.abs(d)<=.02){a.volume=v;if(v===0&&!a.paused)a.pause();return}a.volume=Math.min(1,Math.max(0,a.volume+(d>0?.02:-.02)))}),50);
+function applyMix(){
+  const [name,av,mv]=MIX[curSection]||[null,0,.4];
+  fadeTo(music,soundOn?mv:0);
+  for(const k in amb)fadeTo(amb[k],soundOn&&k===name?av:0);
+}
+function sfx(n,v){if(!soundOn)return;const now=performance.now();if(n.startsWith('corte')){if(now-lastSlash<120)return;lastSlash=now}
+  const a=SFX[n].cloneNode();a.volume=Math.min(1,v);a.play().catch(()=>{})}
+const sBtn=$('#soundBtn');
+function setSound(on){soundOn=on;sBtn.classList.toggle('on',on);sBtn.classList.add('seen');sBtn.setAttribute('aria-pressed',on);sBtn.setAttribute('aria-label',on?'Silenciar':'Activar sonido');$('#soundLbl').textContent=on?'Silenciar':'Sonido';
+  try{localStorage.setItem('mizu-sound',on?'1':'0')}catch(e){}applyMix()}
+sBtn.addEventListener('click',e=>{e.stopPropagation();setSound(!soundOn)});
+/* Si el visitante ya lo activó antes, se reanuda en su primera interacción (los navegadores bloquean el autoplay) */
+try{if(localStorage.getItem('mizu-sound')==='1')addEventListener('pointerdown',e=>{if(!e.target.closest('#soundBtn'))setSound(true)},{once:true})}catch(e){}
+document.addEventListener('visibilitychange',()=>{if(document.hidden){music.pause();for(const k in amb)amb[k].pause()}else applyMix()});
+
+loop();
+</script>
+</body>
+</html>
