@@ -1,0 +1,171 @@
+{
+ "mizu": {
+  "meta": {
+   "fw": 534,
+   "fh": 520,
+   "ax": 213.5,
+   "ay": 513.9,
+   "figH": 405.2,
+   "cols": 8
+  },
+  "idle": {
+   "src": "assets/anim/mizu_idle.webp",
+   "n": 61,
+   "fps": 12,
+   "loop": true
+  },
+  "slash": {
+   "src": "assets/anim/mizu_slash.webp",
+   "n": 39,
+   "fps": 24,
+   "impact": 22,
+   "rec": 30
+  },
+  "heavy": {
+   "src": "assets/anim/mizu_heavy.webp",
+   "n": 42,
+   "fps": 24,
+   "impact": 19,
+   "rec": 28
+  },
+  "parry": {
+   "src": "assets/anim/mizu_parry.webp",
+   "n": 35,
+   "fps": 24,
+   "impact": 6,
+   "rec": 30
+  },
+  "jump": {
+   "src": "assets/anim/mizu_jump.webp",
+   "n": 39,
+   "fps": 24,
+   "impact": 12,
+   "rec": 26
+  },
+  "hurt": {
+   "src": "assets/anim/mizu_hurt.webp",
+   "n": 30,
+   "fps": 24,
+   "impact": 3,
+   "rec": 26
+  },
+  "counter": {
+   "src": "assets/anim/mizu_counter.webp",
+   "n": 37,
+   "fps": 30,
+   "impact": 13,
+   "rec": 30
+  },
+  "ryusei": {
+   "src": "assets/anim/mizu_ryusei.webp",
+   "n": 50,
+   "fps": 24,
+   "impact": 34,
+   "rec": 24
+  },
+  "victory": {
+   "src": "assets/anim/mizu_victory.webp",
+   "n": 41,
+   "fps": 12,
+   "hold": true
+  },
+  "defeat": {
+   "src": "assets/anim/mizu_defeat.webp",
+   "n": 36,
+   "fps": 18,
+   "hold": true
+  }
+ },
+ "kagero": {
+  "meta": {
+   "fw": 646,
+   "fh": 520,
+   "ax": 338.0,
+   "ay": 518.5,
+   "figH": 388.8,
+   "cols": 8
+  },
+  "idle": {
+   "src": "assets/anim/kagero_idle.webp",
+   "n": 61,
+   "fps": 12,
+   "loop": true
+  },
+  "attack": {
+   "src": "assets/anim/kagero_attack.webp",
+   "n": 42,
+   "fps": 24,
+   "impact": 19,
+   "rec": 28
+  }
+ },
+ "kuro": {
+  "meta": {
+   "fw": 437,
+   "fh": 520,
+   "ax": 234.1,
+   "ay": 518.0,
+   "figH": 500.9,
+   "cols": 8
+  },
+  "idle": {
+   "src": "assets/anim/kuro_idle.webp",
+   "n": 61,
+   "fps": 12,
+   "loop": true
+  },
+  "attack": {
+   "src": "assets/anim/kuro_attack.webp",
+   "n": 32,
+   "fps": 24,
+   "impact": 5,
+   "rec": 24
+  }
+ },
+ "hayato": {
+  "meta": {
+   "fw": 461,
+   "fh": 520,
+   "ax": 312.2,
+   "ay": 518.2,
+   "figH": 454.5,
+   "cols": 8
+  },
+  "idle": {
+   "src": "assets/anim/hayato_idle.webp",
+   "n": 61,
+   "fps": 12,
+   "loop": true
+  },
+  "attack": {
+   "src": "assets/anim/hayato_attack.webp",
+   "n": 36,
+   "fps": 24,
+   "impact": 14,
+   "rec": 28
+  }
+ },
+ "tenku": {
+  "meta": {
+   "fw": 583,
+   "fh": 520,
+   "ax": 386.6,
+   "ay": 517.6,
+   "figH": 513.1,
+   "cols": 8
+  },
+  "idle": {
+   "src": "assets/anim/tenku_idle.webp",
+   "n": 61,
+   "fps": 12,
+   "loop": true
+  },
+  "attack": {
+   "src": "assets/anim/tenku_attack.webp",
+   "n": 39,
+   "fps": 24,
+   "impact": 17,
+   "rec": 28
+  }
+ }
+}
