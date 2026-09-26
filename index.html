@@ -226,6 +226,18 @@ section.has-photo .scene,section.has-photo .moon{display:none}
 #soundBtn:not(.on):not(.seen){animation:pulse 2.4s ease-in-out infinite}
 @keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(92,194,255,.35)}50%{box-shadow:0 0 0 8px rgba(92,194,255,0)}}
 @media (pointer:coarse){#soundBtn{cursor:pointer;right:16px;bottom:16px}}
+/* JUEGO */
+.play-btn{display:inline-flex;align-items:center;gap:12px;margin-top:22px;padding:16px 34px;border:1px solid rgba(240,197,106,.7);color:#f0c56a;text-decoration:none;font-family:var(--sans);font-size:12px;letter-spacing:.35em;text-transform:uppercase;background:rgba(6,8,13,.55);backdrop-filter:blur(6px);transition:background .3s,color .3s,box-shadow .3s;opacity:0;animation:fadeUp 1.4s 2.4s forwards}
+.play-btn:hover{background:#f0c56a;color:var(--ink);box-shadow:0 0 30px rgba(240,197,106,.4)}
+.play-btn b{font-family:var(--jp);font-size:16px;letter-spacing:0;font-weight:400}
+nav ul a.nav-game{color:#f0c56a}
+#hero .scroll-hint{bottom:12px}
+#juego{min-height:90vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;background:linear-gradient(to bottom,var(--ink),rgba(6,8,13,.35) 30%,rgba(6,8,13,.35) 70%,var(--ink)),url('juego/assets/img/title.jpg') center/cover no-repeat}
+#juego .sec-head{justify-content:center;margin-bottom:3vh}
+#juego p.lead{font-family:var(--serif);font-style:italic;font-size:clamp(20px,2.2vw,28px);max-width:720px;color:#dfe5ec;text-shadow:0 2px 20px rgba(0,0,0,.8)}
+#juego ul.feats{list-style:none;display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-top:26px}
+#juego ul.feats li{font-size:11px;letter-spacing:.2em;text-transform:uppercase;padding:8px 14px;border:1px solid rgba(92,194,255,.35);background:rgba(6,8,13,.6)}
+#juego .play-btn{opacity:1;animation:none;margin-top:40px;font-size:13px;padding:20px 44px}
 footer{padding:60px 8vw;border-top:1px solid rgba(255,255,255,.06);display:flex;justify-content:space-between;flex-wrap:wrap;gap:16px;font-size:12px;color:var(--muted);letter-spacing:.15em;background:var(--ink)}
 footer a{color:var(--muted)}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.title span,.jp-sub,.tagline,.eye-wrap{opacity:1;transform:none;filter:none}#loader .brush{stroke-dashoffset:0}}
@@ -252,6 +264,7 @@ footer a{color:var(--muted)}
     <li><a href="#personajes">Personajes</a></li>
     <li><a href="#temas">Temas</a></li>
     <li><a href="#final">Final</a></li>
+    <li><a href="juego/" class="nav-game">Jugar</a></li>
   </ul>
 </nav>
 
@@ -283,6 +296,7 @@ footer a{color:var(--muted)}
       </svg>
     </div>
   </div>
+  <a class="play-btn" href="juego/" style="position:relative;z-index:3"><b>剣</b> Juega la demo</a>
   <div class="scroll-hint">Desciende<i></i></div>
 </section>
 
@@ -377,6 +391,13 @@ footer a{color:var(--muted)}
   <button class="btn" id="spBtn" aria-expanded="false">Desvelar el final</button>
   <p class="quote" id="quote" lang="ja"></p>
   <p class="quote-es">El agua no se rompe. Encuentra el camino.</p>
+</section>
+
+<section id="juego">
+  <div class="sec-head reveal"><span class="sec-num">遊</span><h2 class="sec-title">La Senda <em>del Dojo Celeste</em></h2></div>
+  <p class="lead reveal">Una demo jugable protagonizada por Mizu: supera las tres pruebas del dojo y enfréntate al Maestro Tenkū bajo un cielo de estrellas.</p>
+  <ul class="feats reveal"><li>Combate por turnos reactivo</li><li>Paradas y contraataques</li><li>4 combates</li><li>Sala de entrenamiento</li></ul>
+  <a class="play-btn" href="juego/"><b>剣</b> Jugar ahora</a>
 </section>
 
 <footer><span>水 · Un homenaje fan a Blue Eye Samurai (Netflix, 2023)</span><span>Hecho con tinta y acero</span></footer>
