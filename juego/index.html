@@ -370,6 +370,8 @@ kbd{display:inline-flex;align-items:center;justify-content:center;min-width:22px
     <div><h4>El destello del arma</h4><p>Antes de cada golpe real el arma <b>destella y suena un «tin»</b>, siempre con la misma antelación. Las fintas no destellan.</p></div>
     <div><h4>Anillo de colores</h4><p>Se cierra hacia Mizu: franja <b style="color:var(--blue)">azul</b> = esquivar, <b style="color:var(--gold)">dorada</b> = parar, <b>blanca</b> = parada perfecta. Tu pulsación queda marcada y verás si fue <b>pronto</b> o <b>tarde</b>.</p></div>
     <div><h4>Cadena de golpes</h4><p>Los rombos sobre Mizu son los golpes del ataque. Se rellenan al parar; si uno se rompe, ya no habrá contraataque.</p></div>
+    <div><h4 style="color:#ff8a7e">Furia</h4><p>Cuando un rival queda con poca vida <b>se enfurece</b>: aura roja, actúa más a menudo, prepara sus golpes más rápido y pega más fuerte.</p></div>
+    <div><h4>Dificultad</h4><p><b>Historia</b>: ventanas amplias y rivales blandos. <b>Normal</b>: la experiencia pensada. <b>Maestro</b>: ventanas estrechas y golpes durísimos. Se cambia en la pantalla de título.</p></div>
     <div><h4>No machaques</h4><p>Cada pulsación fallida deja a Mizu expuesta un instante. Escucha el acero y pulsa una vez, en el momento justo.</p></div>
     <div><h4>Puntos de acción (PA)</h4><p>Atacar da <b>+1 PA</b>. Parar da <b>+1 PA</b>. Las técnicas cuestan PA y tienen pulsaciones: pulsa <kbd>E</kbd> cuando el anillo se cierre.</p></div>
     <div><h4>Kunai · Disparo libre</h4><p>1 PA por lanzamiento y <b>no gasta tu turno</b>. Cada impacto rompe un escudo. Apunta a los <b>puntos débiles</b> brillantes.</p></div>
@@ -397,6 +399,14 @@ function pickW(o){let s=0;for(const k in o)s+=o[k];let r=Math.random()*s;for(con
 /* ================= PERSISTENCIA ================= */
 const store={get(k,d){try{const v=localStorage.getItem('mizu-rpg-'+k);return v==null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem('mizu-rpg-'+k,JSON.stringify(v))}catch(e){}}};
 const settings=Object.assign({ring:true,wide:false,sound:true},store.get('settings',{}));
+if(!settings.diff)settings.diff=settings.wide?'historia':'normal';
+// Dificultad: daño recibido, vida enemiga, ventanas de defensa, furia y tónicos
+const DIFFS={
+  historia:{name:'Historia',dmg:.6,hp:.8,win:1.6,perf:1.4,enrage:0,tonics:3,counter:1.1,desc:'Ventanas amplias y enemigos más blandos. Para disfrutar de la historia.'},
+  normal:{name:'Normal',dmg:1,hp:1,win:1,perf:1,enrage:.35,tonics:3,counter:1,desc:'La experiencia pensada: exige aprender cada ataque.'},
+  maestro:{name:'Maestro',dmg:1.3,hp:1.2,win:.85,perf:.85,enrage:.5,tonics:2,counter:.9,desc:'Ventanas más estrechas, golpes más duros y rivales que se enfurecen antes.'}};
+const DIFF_ORDER=['historia','normal','maestro'];
+const D=()=>DIFFS[settings.diff]||DIFFS.normal;
 let save=store.get('save',null);
 const newSave=()=>({cleared:0,level:1,skills:['rio','eiji'],charms:[],stats:{parries:0,counters:0,perfect:0}});
 
@@ -477,14 +487,14 @@ const N=(t,o={})=>Object.assign({t,kind:'normal',anim:'slash',dmg:1},o);
 const J=(t,o={})=>Object.assign({t,kind:'jump',anim:'shock',dmg:1.2},o);
 const G=(t,o={})=>Object.assign({t,kind:'grad',anim:'star',dmg:2.2},o);
 const FOES={
-  hayato:{name:'Hayato',title:'el Discípulo',kanji:'壱',img:'hayato.png',scale:.98,tip:{x:.06,y:.04},hp:620,atk:60,spd:10,brk:90,shields:0,bg:'arena1.jpg',amb:'snow',music:'battle',
+  hayato:{name:'Hayato',title:'el Discípulo',kanji:'壱',img:'hayato.png',scale:.98,tip:{x:.06,y:.04},hp:880,atk:62,spd:10,brk:100,shields:0,bg:'arena1.jpg',amb:'snow',music:'battle',
     weak:[],
     attacks:{
       a:{name:'Tajo del Aprendiz',melee:true,windup:550,hits:[N(700)]},
       b:{name:'Doble Corte',melee:true,windup:500,hits:[N(600),N(1100)]},
       c:{name:'Furia del Bokken',melee:true,windup:600,hits:[N(600),N(950),N(1300,{dmg:1.3})]}},
-    ai(E,n){return n===0?'a':n===1?'b':pickW({a:1,b:3,c:3})}},
-  kagero:{name:'Kagerō',title:'la Lanza Fantasma',kanji:'弐',img:'kagero.png',scale:.8,card:'background-size:185% auto;background-position:68% 42%;',tip:{x:.03,y:.27},hp:1050,atk:74,spd:13,brk:120,shields:0,bg:'arena2.jpg',amb:'fireflies',music:'battle',
+    ai(E,n){return n===0?'a':n===1?'b':pickW({a:1,b:3,c:4})}},
+  kagero:{name:'Kagerō',title:'la Lanza Fantasma',kanji:'弐',img:'kagero.png',scale:.8,card:'background-size:185% auto;background-position:68% 42%;',tip:{x:.03,y:.27},hp:1250,atk:70,spd:12,brk:130,shields:0,bg:'arena2.jpg',amb:'fireflies',music:'battle',
     weak:[{id:'mask',x:.58,y:.2,r:.075,label:'Máscara'}],
     attacks:{
       a:{name:'Estocada Fantasma',melee:true,windup:500,hits:[N(600,{anim:'thrust'}),N(1400,{anim:'thrust'}),N(1650,{anim:'thrust'})],feints:[1000]},
@@ -492,7 +502,7 @@ const FOES={
       c:{name:'Danza de la Luna Verde',melee:true,windup:500,hits:[N(550),N(800,{anim:'thrust'}),N(1050),N(1800,{anim:'thrust',dmg:1.3}),N(2050)],feints:[1400]},
       d:{name:'Postura del Espectro',buff:'shields',n:3}},
     ai(E,n){if(n===0)return 'b';if(E.shields===0&&E.last!=='d'&&Math.random()<.3)return 'd';return pickW({a:3,b:2,c:3})}},
-  kuro:{name:'Kuro',title:'el Arcabucero',kanji:'参',img:'kuro.png',scale:1,tip:{x:.03,y:.16},hp:1250,atk:84,spd:9,brk:140,shields:4,bg:'arena3.jpg',amb:'embers',music:'battle',
+  kuro:{name:'Kuro',title:'el Arcabucero',kanji:'参',img:'kuro.png',scale:1,tip:{x:.03,y:.16},hp:1450,atk:80,spd:10,brk:150,shields:4,bg:'arena3.jpg',amb:'embers',music:'battle',
     weak:[{id:'powder',x:.53,y:.47,r:.05,label:'Bolsa de pólvora'}],
     attacks:{
       a:{name:'Disparo Certero',windup:900,hits:[N(1150,{anim:'shot',dmg:1.4,burn:1})]},
@@ -500,7 +510,7 @@ const FOES={
       c:{name:'Barril de Pólvora',windup:600,hits:[J(1500,{anim:'barrel',dmg:1.4,burn:1}),N(2200,{anim:'shot'})]},
       d:{name:'Coraza de Hierro',buff:'shields',n:4,rearm:true}},
     ai(E,n){if(E.shields===0&&E.last!=='d'&&Math.random()<.45)return 'd';return pickW({a:3,b:3,c:2})}},
-  tenku:{name:'Tenkū',title:'Maestro del Cielo',kanji:'天',img:'tenku.png',scale:1.14,tip:{x:.14,y:.08},hp:1700,atk:94,spd:14,brk:170,shields:0,bg:'final1.jpg',amb:'snow',music:'boss',final:true,
+  tenku:{name:'Tenkū',title:'Maestro del Cielo',kanji:'天',img:'tenku.png',scale:1.14,tip:{x:.14,y:.08},hp:2000,atk:88,spd:13,brk:180,shields:0,bg:'final1.jpg',amb:'snow',music:'boss',final:true,
     weak:[{id:'gem',x:.56,y:.3,r:.045,label:'Gema estelar',phase2:true}],
     attacks:{
       a:{name:'Arco Lunar',melee:true,windup:500,hits:[N(600),N(900),N(1200),N(1900,{dmg:1.3})],feints:[1500]},
@@ -508,13 +518,13 @@ const FOES={
       c:{name:'Mil Pétalos',melee:true,windup:450,hits:[N(500,{dmg:.7}),N(700,{dmg:.7}),N(900,{dmg:.7}),N(1300,{dmg:.7}),N(1480,{dmg:.7}),N(1700,{dmg:1.1})]},
       d:{name:'Juicio Estelar',grad:true,windup:1100,hits:[G(1500)]}},
     ai(E,n){if(n===2)return 'd';if(n>2&&n%3===2)return 'd';return pickW({a:3,b:2,c:3})},
-    phase2:{title:'el Cielo Desatado',hp:2200,atk:104,spd:16,brk:210,bg:'final2.jpg',amb:'stars',
+    phase2:{title:'el Cielo Desatado',hp:2400,atk:96,spd:15,brk:220,bg:'final2.jpg',amb:'stars',
       attacks:{
         a:{name:'Constelación del Dragón',melee:true,windup:500,hits:[N(500),N(750),N(1000),N(1250),N(1950,{dmg:1.2}),N(2200),G(3000,{dmg:2})],feints:[1600]},
         b:{name:'Lluvia de Meteoros',windup:700,hits:[J(1000,{anim:'meteor'}),J(1600,{anim:'meteor'}),J(1950,{anim:'meteor',dmg:1.5})]},
         c:{name:'Mil Pétalos Celestes',melee:true,windup:450,hits:[N(400,{dmg:.6}),N(600,{dmg:.6}),N(800,{dmg:.6}),N(1000,{dmg:.6}),N(1400,{dmg:.6}),N(1560,{dmg:.6}),N(1720,{dmg:.6}),N(2150,{dmg:1.2})]},
         s:{name:'Supernova',charge:true},
-        r:{name:'Supernova · Liberación',grad:true,windup:900,hits:[G(1500,{dmg:2.3}),G(2300,{dmg:2.7})]}},
+        r:{name:'Supernova · Liberación',grad:true,windup:900,hits:[G(1500,{dmg:1.9}),G(2300,{dmg:2.3})]}},
       ai(E,n){if(E.charging)return 'r';if(n%4===3)return 's';return pickW({a:3,b:2,c:3})}}},
 };
 const TRIALS=['hayato','kagero','kuro','tenku'];
@@ -653,7 +663,8 @@ function drawSprite(s,shEl){
   const cosmic=s===foe&&E&&E.cosmic;
   const fl=s.flash>0.01?`brightness(${1+s.flash*2.2}) `:'';
   const gl=s.glow>0.01?`drop-shadow(0 0 ${14*s.glow}px rgba(240,197,106,${s.glow}))`:'';
-  el.style.filter=cosmic?`${fl}drop-shadow(0 0 18px rgba(170,120,255,.9)) drop-shadow(0 0 40px rgba(240,197,106,.45)) saturate(1.25)`:((fl+gl)||'none');
+  const rage=s===foe&&E&&E.enraged?` drop-shadow(0 0 16px rgba(255,60,40,${.55+Math.sin(t/160)*.25}))`:'';
+  el.style.filter=cosmic?`${fl}drop-shadow(0 0 18px rgba(170,120,255,.9)) drop-shadow(0 0 40px rgba(240,197,106,.45)) saturate(1.25)${rage}`:((fl+gl+rage)||'none');
   el.style.opacity=s.alpha;
   const st=STATIC[key];if(st&&st.naturalWidth)s.ar=st.naturalWidth/st.naturalHeight;
   const float=cosmic?Math.sin(t/500)*8-14:0;
@@ -735,11 +746,11 @@ function render(t,dt){
   for(let i=parts.length-1;i>=0;i--){const p=parts[i];p.life-=s;if(p.life<=0){parts.splice(i,1);continue}p.x+=p.vx*dt;p.y+=p.vy*dt;p.vy+=p.grav*dt;p.vx*=.97;ctx.fillStyle=`rgba(${p.col},${p.life/p.max})`;ctx.beginPath();ctx.arc(p.x,p.y,p.size,0,6.28);ctx.fill()}
   // anillo de tiempo por zonas: azul = esquivar, dorado = parar, blanco = parada perfecta / impacto
   for(let i=rings.length-1;i>=0;i--){const r=rings[i];if(t>r.T+420||B.over){rings.splice(i,1);continue}if(t<r.start)continue;
-    const c=contact(),V=.22,R0=36,k=settings.wide?1.6:1;
+    const c=contact(),V=.22,R0=36,k=D().win;
     const a=t>r.T+120?Math.max(0,1-(t-r.T-120)/300):Math.min(1,(t-r.start)/160);
     const band=(t1,t2,col)=>{const r1=Math.max(4,R0-t2*V),r2=R0+t1*V;ctx.strokeStyle=col;ctx.lineWidth=r2-r1;ctx.beginPath();ctx.arc(c.x,c.y,(r1+r2)/2,0,6.283);ctx.stroke()};
     ctx.save();ctx.globalAlpha=a;
-    if(r.kind==='normal'){band(WIN.dodge[0]*k,WIN.dodge[1],'rgba(92,194,255,.17)');band(WIN.parry[0]*k,WIN.parry[1],'rgba(240,197,106,.34)');band(PERFECT_PARRY[0]*(settings.wide?1.4:1),PERFECT_PARRY[1]*(settings.wide?1.4:1),'rgba(255,255,255,.4)')}
+    if(r.kind==='normal'){band(WIN.dodge[0]*k,WIN.dodge[1],'rgba(92,194,255,.17)');band(WIN.parry[0]*k,WIN.parry[1],'rgba(240,197,106,.34)');band(PERFECT_PARRY[0]*(D().perf),PERFECT_PARRY[1]*(D().perf),'rgba(255,255,255,.4)')}
     else if(r.kind==='jump')band(WIN.jump[0]*k,WIN.jump[1],'rgba(255,154,60,.3)');
     else band(WIN.grad[0]*k,WIN.grad[1],'rgba(240,197,106,.4)');
     ctx.strokeStyle='rgba(255,255,255,.9)';ctx.lineWidth=1.2;ctx.beginPath();ctx.arc(c.x,c.y,R0,0,6.283);ctx.stroke();
@@ -792,7 +803,7 @@ function hud(){
   const full=E.brk>=E.brkMax&&!E.broken;$('#foeBrk').classList.toggle('full',full);
   $('#brkLabel').textContent=E.broken?'Roto':full?'¡Rompible! · usa Filo de Eiji':'Rotura';
   $('#foeShields').innerHTML='<i></i>'.repeat(E.shields);
-  let st='';if(E.broken)st+='<span class="st broken">Roto</span>';if(E.charging)st+='<span class="st charge">Cargando Supernova</span>';if(E.mark)st+='<span class="st mark">Marca</span>';if(E.vuln)st+=`<span class="st vuln">Vulnerable ${E.vuln}</span>`;if(E.burn)st+=`<span class="st burn">Quemadura ×${E.burn}</span>`;
+  let st='';if(E.broken)st+='<span class="st broken">Roto</span>';if(E.charging)st+='<span class="st charge">Cargando Supernova</span>';if(E.mark)st+='<span class="st mark">Marca</span>';if(E.enraged)st+='<span class="st mark">Furia</span>';if(E.vuln)st+=`<span class="st vuln">Vulnerable ${E.vuln}</span>`;if(E.burn)st+=`<span class="st burn">Quemadura ×${E.burn}</span>`;
   $('#foeStatus').innerHTML=st;
 }
 function timeline(current){
@@ -823,13 +834,13 @@ const K=(k)=>`<kbd>${k}</kbd>`;
 const WIN={parry:[110,45],dodge:[210,60],perfect:80,jump:[240,70],grad:[330,90]};
 const LOCK_FAIL=420,LOCK_OK=60,LOCK_OK_PRESS=110;
 // ¿Esta pulsación cae dentro de la ventana de algún golpe? (se decide en el instante de pulsar)
-function inWindow(act,kind,dt){const k=settings.wide?1.6:1;
+function inWindow(act,kind,dt){const k=D().win;
   if(kind==='normal')return (act==='parry'&&dt>=-WIN.parry[0]*k&&dt<=WIN.parry[1])||(act==='dodge'&&dt>=-WIN.dodge[0]*k&&dt<=WIN.dodge[1]);
   if(kind==='jump')return act==='jump'&&dt>=-WIN.jump[0]*k&&dt<=WIN.jump[1];
   return act==='grad'&&dt>=-WIN.grad[0]*k&&dt<=WIN.grad[1]}
 // Parada perfecta: muy cerca del impacto (ms antes, ms después)
 const PERFECT_PARRY=[40,25];
-const isPerfectParry=dt=>{const k=settings.wide?1.4:1;return dt>=-PERFECT_PARRY[0]*k&&dt<=PERFECT_PARRY[1]*k};
+const isPerfectParry=dt=>{const k=D().perf;return dt>=-PERFECT_PARRY[0]*k&&dt<=PERFECT_PARRY[1]*k};
 const GLINT_LEAD=420;             // el arma destella siempre 420 ms antes del impacto
 const pressLog=[];                // pulsaciones recientes (para marcarlas en el anillo)
 const def={active:false,presses:[],lock:0};
@@ -854,7 +865,7 @@ function pressAnim(act){
   else if(act==='grad'){mizu.glow=1;tween(mizu,{glow:0},500)}
 }
 function checkDefense(kind,T){
-  const k=settings.wide?1.6:1;
+  const k=D().win;
   for(const p of def.presses){if(p.used)continue;const dt=p.t-T;
     if(kind==='normal'){
       if(p.act==='parry'&&dt>=-WIN.parry[0]*k&&dt<=WIN.parry[1]){p.used=true;return {r:'parry',dt}}
@@ -897,7 +908,7 @@ function doBreak(){
   hud();
 }
 function hurtMizu(mult,h){
-  const c=contact();let d=Math.round(E.atk*mult*rand(.93,1.07));
+  const c=contact();let d=Math.round(E.atk*mult*D().dmg*(E.enraged?1.1:1)*rand(.93,1.07));
   P.hp=Math.max(0,P.hp-d);floater('-'+d,c.x-40,c.y-30,'hurt');
   sfx(pick(['hurt1','hurt2']),.8);shake(10);mizu.flash=.9;
   burst(c.x-20,c.y,18,'255,90,70',6,.6);
@@ -994,7 +1005,7 @@ async function counterAttack(perfect){
   for(let i=0;i<4;i++)at(now()+i*30,()=>ghost(mizu));
   await tween(mizu,{x:tx},140,'in');playAnim(mizu,hasAnim(mizu,'counter')?'counter':'slash',{impactAt:now()+90});await wait(90);
   sfx('counter',.9);slashArc(fc.x,fc.y,foe.h*.45,-2.8,.9,'255,235,190',9,.4);slashArc(fc.x,fc.y,foe.h*.38,.4,3.2,'140,210,255',6,.35);
-  flashScreen(.35);hitEnemy(perfect?3.6:2.6,{brk:perfect?55:35,src:'counter'});
+  flashScreen(.35);hitEnemy((perfect?3.1:2.2)*D().counter,{brk:perfect?55:35,src:'counter'});
   if(perfect){burst(fc.x,fc.y,80,'255,225,150',11,1.1,3);shake(16);B.stats.pcounter=(B.stats.pcounter||0)+1}
   if(has('ringo')){const heal=Math.round(P.maxHp*.08);P.hp=Math.min(P.maxHp,P.hp+heal);const c=mCenter();floater('+'+heal,c.x,c.y-mizu.h*.4,'heal');hud()}
   addGrad(15);if(B.training){TR.stats.counters++;trainInfo()}else save.stats.counters++;B.stats.counters++;
@@ -1008,6 +1019,7 @@ async function runAttack(A){
   if(A.grad){$('#darken').style.opacity=1}
   foe.homeAtk=foe.homeX;
   // amago de preparación
+  if(E.enraged)A={...A,windup:A.windup*.8};
   tween(foe,{sy:1.04,rot:4},A.windup*.6,'out');
   if(A.melee){await wait(A.windup*.55);foe.homeAtk=mizu.homeX+mizu.h*mizu.ar*.5+foe.h*foe.ar*.42;for(let i=0;i<3;i++)at(now()+i*40,()=>ghost(foe));await tween(foe,{x:foe.homeAtk,sy:1,rot:0},300,'in');await wait(A.windup*.2)}
   else{await wait(A.windup);tween(foe,{sy:1,rot:0},200)}
@@ -1070,7 +1082,12 @@ async function enemyTurn(){
   if(E.broken){banner(`${d.name} está aturdido`,'foe');await wait(1100);E.broken=false;E.brk=0;const c=fCenter();floater('SE RECUPERA',c.x,c.y-foe.h*.4,'info');hud();await wait(500);E.turn++;return}
   const atkDefs=E.phase2?d.phase2.attacks:d.attacks;
   const ai=E.phase2?d.phase2.ai:d.ai;
-  const key=ai(E,E.turn);E.turn++;const A=atkDefs[key];E.last=key;
+  // Furia: por debajo de cierto % de vida el rival acelera y pega más fuerte
+  if(!E.enraged&&D().enrage&&E.hp/E.maxHp<D().enrage&&!B.training){E.enraged=true;E.spd+=2;banner(`¡${d.name} se enfurece!`,'foe',false,1800);flashScreen(.35,'#ff3b2f');shake(10);sfx('gradient',.5,1.4);const c=fCenter();burst(c.x,c.y,50,'255,70,50',8,1,3);hud();await wait(1200)}
+  let key=ai(E,E.turn);
+  // evita repetir el mismo ataque dos veces seguidas (salvo movimientos especiales)
+  if(key===E.last&&!'dsr'.includes(key)){const k2=ai(E,E.turn);if(k2!==E.last)key=k2}
+  E.turn++;const A=atkDefs[key];E.last=key;
   if(A.buff==='shields'){banner(A.name,'foe');tween(foe,{sy:1.06},300).then(()=>tween(foe,{sy:1},300));await wait(500);E.shields=A.n;if(A.rearm)E.weakCd={};const c=fCenter();floater(`+${A.n} ESCUDOS`,c.x,c.y-foe.h*.4,'shield');sfx('parry2',.6,.7);burst(c.x,c.y,30,'200,220,240',6);hud();await wait(900)}
   else if(A.charge){banner(A.name,'foe',true,2400);E.charging=true;$('#darken').style.opacity=.6;foe.glow=1;sfx('gradient',.7,.8);const c=fCenter();for(let i=0;i<60;i++)at(now()+i*20,()=>burst(c.x+rand(-60,60),c.y+rand(-80,80),1,'255,215,120',2,.8,3,-.05));hud();await wait(1400);foe.glow=.4;$('#darken').style.opacity=0;
     if(!B.tut.nova){B.tut.nova=true;await tutNote(`<div class="big" style="color:var(--gold)">Tenkū carga la Supernova</div><p>En su próximo turno liberará dos golpes de gradiente. Si lo <b>rompes</b> antes (llena su barra dorada y usa <b>Filo de Eiji</b>), la carga se anula. Su <b>gema estelar</b> es un punto débil.</p>`)}}
@@ -1213,9 +1230,9 @@ function previewOrder(n){let p=P.next,e=E.next;const a=[];for(let i=0;i<n;i++){i
 /* ================= FLUJO DE BATALLA ================= */
 function makePlayer(){
   const lv=save.level;let hp=BASE.hp+(lv-1)*70;if(has('roble'))hp=Math.round(hp*1.25);
-  return{maxHp:hp,hp,atk:BASE.atk+(lv-1)*9,spd:BASE.spd,ap:3+(has('aliento')?3:0),maxAp:9,grad:0,burn:0,items:{salud:3,energia:2},dead:false,next:0,gradUsed:false,kunaiFree:false};
+  return{maxHp:hp,hp,atk:BASE.atk+(lv-1)*9,spd:BASE.spd,ap:3+(has('aliento')?3:0),maxAp:9,grad:0,burn:0,items:{salud:D().tonics,energia:2},dead:false,next:0,gradUsed:false,kunaiFree:false};
 }
-function makeFoe(id){const d=FOES[id];return{id,def:d,maxHp:d.hp,hp:d.hp,atk:d.atk,spd:d.spd,brk:0,brkMax:d.brk,shields:d.shields,broken:false,mark:false,vuln:0,burn:0,turn:0,last:null,phase2:false,cosmic:false,charging:false,weakCd:{},next:0}}
+function makeFoe(id){const d=FOES[id];const hp=Math.round(d.hp*D().hp);return{id,def:d,maxHp:hp,hp,enraged:false,atk:d.atk,spd:d.spd,brk:0,brkMax:d.brk,shields:d.shields,broken:false,mark:false,vuln:0,burn:0,turn:0,last:null,phase2:false,cosmic:false,charging:false,weakCd:{},next:0}}
 function clearFx(){glints.length=0;pressLog.length=0;cam.z=1;if(B)B.chain=null;timers.length=0;tweens=[];parts.length=0;arcs.length=0;projs.length=0;waves.length=0;ghosts.length=0;rings.length=0;qte=null;jc=null;aim.on=false;def.active=false;frozen=false;slow=1;applyScale();
   ['#menu','#desc','#legend','#aimHud','#touch','#tip','#toast'].forEach(s=>$(s).classList.remove('on'));$('#darken').style.opacity=0;$('#floaters').innerHTML=''}
 
@@ -1262,7 +1279,7 @@ async function phaseTwo(){
   sfx('gradient',.9,.7);flashScreen(1,'#fff');shake(20);
   $('#bg2').style.backgroundImage=`url(assets/img/${p2.bg})`;$('#bg2').style.opacity=1;
   setAmbient(p2.amb);
-  E.phase2=true;E.cosmic=true;E.maxHp=p2.hp;E.hp=p2.hp;E.atk=p2.atk;E.spd=p2.spd;E.brkMax=p2.brk;E.brk=0;E.broken=false;E.turn=0;E.shields=0;E.weakCd={};E.charging=false;
+  E.phase2=true;E.cosmic=true;E.enraged=false;E.maxHp=Math.round(p2.hp*D().hp);E.hp=E.maxHp;E.atk=p2.atk;E.spd=p2.spd;E.brkMax=p2.brk;E.brk=0;E.broken=false;E.turn=0;E.shields=0;E.weakCd={};E.charging=false;
   $('#foeName').innerHTML=`${d.name}<small>${p2.title}</small>`;
   tween(foe,{sy:1,rot:0},600);
   const c=fCenter();burst(c.x,c.y,120,'255,220,150',12,1.4,3);burst(c.x,c.y,80,'170,120,255',10,1.4,3);
@@ -1408,13 +1425,13 @@ $('#aimBack').onclick=e=>{e.stopPropagation();exitAim()};
 function show(id){$$('.screen').forEach(s=>s.classList.toggle('on',s.id===id))}
 function refreshOpts(){
   $('#optRing').innerHTML=`Anillo de tiempo: <b>${settings.ring?'Sí':'No (puro Expedition)'}</b>`;
-  $('#optWide').innerHTML=`Ventana de defensa: <b>${settings.wide?'Amplia':'Normal'}</b>`;
+  $('#optWide').innerHTML=`Dificultad: <b>${D().name}</b>`;$('#optWide').title=D().desc;
   $('#optSnd').innerHTML=`Sonido: <b>${settings.sound?'Sí':'No'}</b>`;
   $('#gRing').textContent='Anillo: '+(settings.ring?'Sí':'No');$('#gSnd').textContent='Sonido: '+(settings.sound?'Sí':'No');
   $('#btnCont').hidden=!(save&&save.cleared>0&&save.cleared<4);
 }
 $('#optRing').onclick=$('#gRing').onclick=()=>{settings.ring=!settings.ring;store.set('settings',settings);refreshOpts();sfx('click',.5)};
-$('#optWide').onclick=()=>{settings.wide=!settings.wide;store.set('settings',settings);refreshOpts();sfx('click',.5)};
+$('#optWide').onclick=()=>{settings.diff=DIFF_ORDER[(DIFF_ORDER.indexOf(settings.diff)+1)%3];store.set('settings',settings);refreshOpts();sfx('click',.5);toast&&0};
 $('#optSnd').onclick=$('#gSnd').onclick=()=>toggleSound();
 $('#gQuit').onclick=()=>{if(!B||B.over)return;B.over=true;clearFx();music(null);goHub()};
 $('#btnHow').onclick=$('#btnHow2').onclick=()=>{sfx('click',.5);$('#howOv').classList.add('on')};
@@ -1436,6 +1453,7 @@ function goHub(){
   $$('#trials .trial').forEach(b=>b.onclick=async()=>{if(b.disabled)return;sfx('click',.6);const i=+b.dataset.i;await dialog(STORY[TRIALS[i]+'_pre']);startBattle(i)});
   const P0=makePlayer();
   $('#mizuCard').innerHTML=`<h4>Mizu<span>NIVEL ${save.level}</span></h4>
+    <div class="row">Dificultad <b>${D().name}</b></div>
     <div class="row">Vida <b>${P0.maxHp}</b> · Ataque <b>${P0.atk}</b> · PA inicial <b>${P0.ap}</b></div>
     <div class="row">Técnicas<br>${save.skills.map(s=>`<span class="tag">${s==='ryusei'?'Ryūsei':SKILLS[s].name}</span>`).join('')}</div>
     <div class="row">Omamori<br>${save.charms.length?save.charms.map(k=>`<span class="tag charm" title="${CHARMS[k].desc}">${CHARMS[k].ic} ${CHARMS[k].name}</span>`).join(''):'<i>Ninguno aún</i>'}</div>`;
